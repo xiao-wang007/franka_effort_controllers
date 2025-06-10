@@ -41,6 +41,8 @@ namespace linearmpc_panda {
         //Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> v_now_(robot_state_.dq.data());
 		//Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> u_now_(robot_state_.tau_J.data());
 
+		q_init_desired_sub_ = node_handle.subscribe("/q_init_desired", 1, &LinearMPCController::q_init_callback, this) // should make sure the publisher is latched
+
 		//get upsampled solution trajectory, at hardware frequency 1kHz 
 		executor_sub_ = node_handle.subscribe("/upsampled_u_cmd", 1, &LinearMPCController::executor_callback, this);
 		// mpc_t_start_pub_ = node_handle.advertise<std_msgs::Time>("/mpc_t_start", 1, true); //True for latched publisher
@@ -54,17 +56,29 @@ namespace linearmpc_panda {
 	//#######################################################################################
     void LinearMPCController::starting(const ros::Time& time) 
     {
-		while (ros::Time::now().toSec() == 0.0 && ros::ok()) 
-		{
-			ros::Duration(0.1).sleep();
+		//while (ros::Time::now().toSec() == 0.0 && ros::ok()) 
+		//{
+			//ros::Duration(0.1).sleep();
+		//}
+		//ROS_INFO("Clock started at %f", ros::Time::now().toSec());
+
+		//// publish mpc starting time
+		//mpc_t_start_msg_.data = ros::Time::now();
+		//mpc_t_start_pub_.publish(mpc_t_start_msg_);
+		//ROS_INFO_STREAM("Published latched /mpc_t_start = " << mpc_t_start_msg_.data.toSec());
+
+		/* do this: 
+		
+		  // Wait for the first message (timeout after 1.0 sec)
+		auto msg = ros::topic::waitForMessage<std_msgs::Float64>("your_topic", nh_, ros::Duration(1.0));
+		if (msg) {
+			ROS_INFO("First message received: %f", msg->data);
+		} else {
+			ROS_WARN("No message received within timeout!");
 		}
-		ROS_INFO("Clock started at %f", ros::Time::now().toSec());
-
-		// publish mpc starting time
-		mpc_t_start_msg_.data = ros::Time::now();
-		mpc_t_start_pub_.publish(mpc_t_start_msg_);
-		ROS_INFO_STREAM("Published latched /mpc_t_start = " << mpc_t_start_msg_.data.toSec());
-
+	
+		
+		*/
 
         // set the condition here to check if current robot state is close to x0_ref
 		if (!initial_pose_ok())
@@ -132,6 +146,21 @@ namespace linearmpc_panda {
 		}
 	}
 
+	//#######################################################################################
+	void LinearMPCController::q_init_callback(const std_msgs::Float64MultiArray::ConstPtr& dim7_vec_msg) 
+	{
+		
+		// ROS_INFO("checking inside executor_callback(), 1 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& \n");
+		//get the upsampled solution
+		if (dim7_vec_msg->data.size() == 0)
+		{
+			return;
+		}
+		else
+		{
+			q_init_desired_ = Eigen::Map<const Eigen::VectorXd>(dim7_vec_msg->data.data(), dim7_vec_msg->data.size());
+		}
+	}
 
 } //namespace linearmpc_panda
 
