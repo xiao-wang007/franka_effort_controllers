@@ -1,0 +1,7 @@
+<library path="lib/libpanda_mpc">
+  <class name="panda_mpc/LinearMPCController" type="linearmpc_panda::LinearMPCController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      A controller that subs to an mpc tracking controller to fetch the u_cmd at hardware rate
+    </description>
+  </class>
+</library>
