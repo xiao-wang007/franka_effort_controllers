@@ -10,6 +10,7 @@ namespace linearmpc_panda {
 	//#######################################################################################
     bool LinearMPCController::init(hardware_interface::RobotHW *robot_hw, ros::NodeHandle &node_handle) 
 	{
+		nh_ = node_handle;
 
         //Get Franka model and state interfaces
         auto *model_interface = robot_hw->get<franka_hw::FrankaModelInterface>();
@@ -67,18 +68,14 @@ namespace linearmpc_panda {
 		//mpc_t_start_pub_.publish(mpc_t_start_msg_);
 		//ROS_INFO_STREAM("Published latched /mpc_t_start = " << mpc_t_start_msg_.data.toSec());
 
-		/* do this: 
-		
-		  // Wait for the first message (timeout after 1.0 sec)
-		auto msg = ros::topic::waitForMessage<std_msgs::Float64>("your_topic", nh_, ros::Duration(1.0));
+		/* do this: */
+		// Wait for the first message (timeout after 1.0 sec)
+		auto msg = ros::topic::waitForMessage<std_msgs::Float64MultiArray>("/franka_state_controller/joint_states", nh_, ros::Duration(1.0));
 		if (msg) {
 			ROS_INFO("First message received: %f", msg->data);
 		} else {
 			ROS_WARN("No message received within timeout!");
 		}
-	
-		
-		*/
 
         // set the condition here to check if current robot state is close to x0_ref
 		if (!initial_pose_ok())

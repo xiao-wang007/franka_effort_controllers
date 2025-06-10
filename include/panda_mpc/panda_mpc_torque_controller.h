@@ -50,12 +50,13 @@ namespace linearmpc_panda {
         void q_init_callback(const std_msgs::Float64MultiArray::ConstPtr& msg);
 
     private:
+        ros::NodeHandle nh_;
         /* TODO: make the matrix or vector size explicit where possible! Some are dependent on 
                  MPC loop parameters, find a way to fix its size accordingly in the constructor */
         ros::Subscriber executor_sub_; // sub to set u_cmd at 1kHz
         ros::Subscriber q_init_desired_sub_; // use this to check if the tracking is ready to be started
-        ros::Publisher mpc_t_start_pub_;
-            
+        ros::Publisher mpc_t_start_pub_;        
+        
         std::unique_ptr <franka_hw::FrankaModelHandle> model_handle_;
         std::unique_ptr <franka_hw::FrankaStateHandle> state_handle_;
         std::vector<hardware_interface::JointHandle> joint_handles_;
