@@ -43,7 +43,7 @@ namespace linearmpc_panda {
 		//get upsampled solution trajectory, at hardware frequency 1kHz 
 		executor_sub_ = node_handle.subscribe("/upsampled_u_cmd", 1, &LinearMPCController::executor_callback, this);
 		// mpc_t_start_pub_ = node_handle.advertise<std_msgs::Time>("/mpc_t_start", 1, true); //True for latched publisher
-		q_init_flag_pub_ = node_handle.advertise<std_msgs::Bool>("/q_init_ok", 1, true); //True for latched publisher
+		q_init_flag_pub_ = node_handle.advertise<std_msgs::Bool>("/q_init_reached", 1, true); //True for latched publisher
 
 		u_cmd_ = Eigen::VectorXd::Zero(NUM_JOINTS);
 
