@@ -31,10 +31,6 @@ if(NOT Franka_FOUND)
   find_package(Franka 0.8.0 REQUIRED)
 endif()
 
-add_message_files(FILES
-  JointTorqueComparison.msg
-)
-
 generate_messages()
 
 #generate_dynamic_reconfigure_options(
@@ -77,7 +73,7 @@ add_dependencies(panda_mpc
   ${catkin_EXPORTED_TARGETS}
   ${PROJECT_NAME}_generate_messages_cpp
   ${PROJECT_NAME}_gencpp
-  ${PROJECT_NAME}_gencfg
+  # ${PROJECT_NAME}_gencfg
 )
 
 target_link_libraries(panda_mpc PUBLIC
@@ -110,13 +106,16 @@ install(DIRECTORY launch
 install(DIRECTORY config
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
-install(FILES mpc_controller_plugins.xml
+install(FILES panda_mpc_controller_plugins.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
-catkin_install_python(
-  PROGRAMS scripts/interactive_marker.py scripts/move_to_start.py scripts/dual_arm_interactive_marker.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+# #this is same as above
+# pluginlib_export_plugin_description_file(controller_interface panda_mpc_controller_plugins.xml)
+
+# catkin_install_python(
+#   PROGRAMS scripts/interactive_marker.py scripts/move_to_start.py scripts/dual_arm_interactive_marker.py
+#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# )
 
 ## Tools
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake/ClangTools.cmake OPTIONAL

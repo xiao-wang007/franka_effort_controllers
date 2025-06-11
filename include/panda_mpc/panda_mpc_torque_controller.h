@@ -1,9 +1,9 @@
 #pragma once
 
 #include <mutex>
-#include "linear_mpc_prob.h"
 #include <optional>
 #include <sensor_msgs/JointState.h> //this is generic ROS message header, needed for gazebo sim
+#include <std_msgs/Bool.h>
 #include <controller_interface/multi_interface_controller.h>
 #include <hardware_interface/robot_hw.h>
 #include <hardware_interface/joint_command_interface.h>

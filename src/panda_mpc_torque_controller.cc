@@ -1,5 +1,5 @@
 // #include "panda_QP_controller.h"
-#include <linearmpc_panda/panda_mpc_torque_controller.h>
+#include <panda_mpc/panda_mpc_torque_controller.h>
 #include <pluginlib/class_list_macros.h>
 #include <franka/robot_state.h>
 #include <franka_hw/franka_model_interface.h>
@@ -38,7 +38,7 @@ namespace linearmpc_panda {
         joint_handles_.push_back(effort_joint_interface->getHandle("panda_joint7"));
 
 
-		q_init_desired_sub_ = node_handle.subscribe("/q_init_desired", 1, &LinearMPCController::q_init_callback, this) // should make sure the publisher is latched
+		q_init_desired_sub_ = node_handle.subscribe("/q_init_desired", 1, &LinearMPCController::q_init_callback, this); 
 
 		//get upsampled solution trajectory, at hardware frequency 1kHz 
 		executor_sub_ = node_handle.subscribe("/upsampled_u_cmd", 1, &LinearMPCController::executor_callback, this);
@@ -64,7 +64,7 @@ namespace linearmpc_panda {
 		Eigen::Map<const Eigen::VectorXd> qd(msg->position.data(), msg->position.size());
 
 		if (msg) {
-			ROS_INFO("First message received: %f", msg->data);
+			ROS_INFO_STREAM("q_init_desired received: " << qd.transpose());
 		} else {
 			ROS_WARN("No message received within timeout!");
 		}
@@ -150,6 +150,9 @@ namespace linearmpc_panda {
 			ROS_INFO("Current robot state is close to the desired initial pose.");
 			return true;
 		}
+
+		ROS_INFO("Current robot state is exactly at the threshold.");
+		return true;  // or false, depending on your logic
 	}
 
 	//#######################################################################################
@@ -171,18 +174,18 @@ namespace linearmpc_panda {
 	}
 
 	//#######################################################################################
-	void LinearMPCController::q_init_callback(const std_msgs::Float64MultiArray::ConstPtr& dim7_vec_msg) 
+	void LinearMPCController::q_init_callback(const sensor_msgs::JointState::ConstPtr& msg) 
 	{
 		
 		// ROS_INFO("checking inside executor_callback(), 1 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& \n");
 		//get the upsampled solution
-		if (dim7_vec_msg->data.size() == 0)
+		if (msg->position.size() == 0)
 		{
 			return;
 		}
 		else
 		{
-			q_init_desired_ = Eigen::Map<const Eigen::VectorXd>(dim7_vec_msg->data.data(), dim7_vec_msg->data.size());
+			q_init_desired_ = Eigen::Map<const Eigen::VectorXd>(msg->position.data(), msg->position.size());
 		}
 	}
 

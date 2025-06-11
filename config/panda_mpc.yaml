@@ -1,5 +1,5 @@
 panda_linearmpc_controller:
-    type: linearmpc_panda/LinearMPCController
+    type: panda_mpc/LinearMPCController
     arm_id: panda
     joint_names:
         - panda_joint1
