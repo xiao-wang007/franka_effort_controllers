@@ -14,6 +14,7 @@
 #include <ros/publisher.h>
 #include <ros/time.h>
 #include <std_msgs/Float64MultiArray.h>
+#include <sensor_msgs/JointState.h>
 #include <std_msgs/Time.h>
 #include <Eigen/Core>
 
@@ -44,7 +45,7 @@ namespace linearmpc_panda {
         void executor_callback(const std_msgs::Float64MultiArray::ConstPtr& msg);
 
         //
-        bool initial_pose_ok();
+        bool initial_pose_ok(const Eigen::VectorXd& q_init_desired); 
 
         //
         void q_init_callback(const std_msgs::Float64MultiArray::ConstPtr& msg);
@@ -55,27 +56,12 @@ namespace linearmpc_panda {
                  MPC loop parameters, find a way to fix its size accordingly in the constructor */
         ros::Subscriber executor_sub_; // sub to set u_cmd at 1kHz
         ros::Subscriber q_init_desired_sub_; // use this to check if the tracking is ready to be started
-        ros::Publisher mpc_t_start_pub_;        
+        ros::Publisher mpc_t_start_pub_;
+        ros::Publisher q_init_flag_pub_;        
         
         std::unique_ptr <franka_hw::FrankaModelHandle> model_handle_;
         std::unique_ptr <franka_hw::FrankaStateHandle> state_handle_;
         std::vector<hardware_interface::JointHandle> joint_handles_;
-	//#######################################################################################
-	void LinearMPCController::executor_callback(const std_msgs::Float64MultiArray::ConstPtr& dim7_vec_msg) 
-	{
-		
-		// ROS_INFO("checking inside executor_callback(), 1 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& \n");
-		//get the upsampled solution
-		if (dim7_vec_msg->data.size() == 0)
-		{
-			return;
-		}
-		else
-		{
-			std::lock_guard<std::mutex> lock(u_cmd_mutex_);
-			u_cmd_ = Eigen::Map<const Eigen::VectorXd>(dim7_vec_msg->data.data(), dim7_vec_msg->data.size());
-		}
-	}
         Eigen::Matrix<double, NUM_JOINTS, 1> q_now_ {};
         Eigen::Matrix<double, NUM_JOINTS, 1> v_now_ {};
         Eigen::Matrix<double, NUM_JOINTS, 1> u_now_ {};
@@ -85,6 +71,8 @@ namespace linearmpc_panda {
         std::mutex u_cmd_mutex_;
         // std_msgs::Time mpc_t_start_msg_ {};
         Eigen::VectorXd q_init_desired_ {};
+        bool u_cmd_received_ {false};
+
     };
 } // namespace linearmpc_panda
 
