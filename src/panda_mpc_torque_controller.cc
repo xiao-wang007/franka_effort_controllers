@@ -37,10 +37,6 @@ namespace linearmpc_panda {
         joint_handles_.push_back(effort_joint_interface->getHandle("panda_joint6"));
         joint_handles_.push_back(effort_joint_interface->getHandle("panda_joint7"));
 
-        //// Convert current robot position and velocity into Eigen data storage
-        //Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> q_now_(robot_state_.q.data());
-        //Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> v_now_(robot_state_.dq.data());
-		//Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> u_now_(robot_state_.tau_J.data());
 
 		q_init_desired_sub_ = node_handle.subscribe("/q_init_desired", 1, &LinearMPCController::q_init_callback, this) // should make sure the publisher is latched
 
@@ -58,9 +54,15 @@ namespace linearmpc_panda {
 	//#######################################################################################
     void LinearMPCController::starting(const ros::Time& time) 
     {
+		
+        // Convert current robot position and velocity into Eigen data storage
+        Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> q_now_(robot_state_.q.data());
+        Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> v_now_(robot_state_.dq.data());
+		Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> u_now_(robot_state_.tau_J.data());
 		// Wait for the first message (timeout after 1.0 sec)
-		auto msg = ros::topic::waitForMessage<sensor_msgs::JointState>("/franka_state_controller/joint_states", nh_, ros::Duration(1.0));
-		Eigen::Map<const Eigen::VectorXd> qs(msg->position.data(), msg->position.size());
+		auto msg = ros::topic::waitForMessage<sensor_msgs::JointState>("/q_init_desired", nh_, ros::Duration(1.0));
+		Eigen::Map<const Eigen::VectorXd> qd(msg->position.data(), msg->position.size());
+
 		if (msg) {
 			ROS_INFO("First message received: %f", msg->data);
 		} else {
@@ -68,7 +70,7 @@ namespace linearmpc_panda {
 		}
 
         // set the condition here to check if current robot state is close to x0_ref
-		if (!initial_pose_ok(qs))
+		if (!initial_pose_ok(qd))
 		{
 			std_msgs::Bool q_init_ok_msg;
 			q_init_ok_msg.data = false;
@@ -79,15 +81,21 @@ namespace linearmpc_panda {
 			ros::Rate rate(100); // 100 Hz
 			while (ros::ok())
 			{
-				auto msg = ros::topic::waitForMessage<sensor_msgs::JointState>("/franka_state_controller/joint_states", nh_, ros::Duration(1.0));
+				//read joint states again in the loop
+				Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> q_now_(robot_state_.q.data());
+				Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> v_now_(robot_state_.dq.data());
+				Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> u_now_(robot_state_.tau_J.data());
+				auto msg = ros::topic::waitForMessage<sensor_msgs::JointState>("/q_init_desired", nh_, ros::Duration(1.0));
+
 				if (!msg)
 				{
-					ROS_WARN("Waiting for joint states msg...");
+					ROS_WARN("Waiting for /q_init_desired msg...");
 					rate.sleep();
 					continue;
 				}
-				Eigen::Map<const Eigen::VectorXd> qs(msg->position.data(), msg->position.size());
-				if (initial_pose_ok(qs)) 
+
+				Eigen::Map<const Eigen::VectorXd> qd(msg->position.data(), msg->position.size());
+				if (initial_pose_ok(qd)) 
 				{
 					ROS_INFO("Initial pose is reached! Setting the flag...");
 					q_init_ok_msg.data = true;
@@ -96,7 +104,7 @@ namespace linearmpc_panda {
 				}
 				else 
 				{
-					ROS_WARN("Waiting for initial pose to be reached...");
+					ROS_WARN("Waiting for q_init_desired to be reached...");
 					rate.sleep();
 				}
 			}
