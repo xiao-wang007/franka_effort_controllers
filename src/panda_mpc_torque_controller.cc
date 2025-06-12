@@ -23,8 +23,26 @@ namespace linearmpc_panda {
         }
 
         // Get handles
-        model_handle_ = std::make_unique<franka_hw::FrankaModelHandle>(model_interface->getHandle("panda_model"));
-        state_handle_ = std::make_unique<franka_hw::FrankaStateHandle>(state_interface->getHandle("panda_robot"));
+		// initialize model and state handles
+		try 
+		{
+        	model_handle_ = std::make_unique<franka_hw::FrankaModelHandle>(model_interface->getHandle("panda_model"));
+		} catch (const hardware_interface::HardwareInterfaceException& e) 
+		{
+			ROS_ERROR_STREAM("Failed to get Franka model handle: " << e.what());
+			return false;
+		}
+
+		try 
+		{
+			state_handle_ = std::make_unique<franka_hw::FrankaStateHandle>(state_interface->getHandle("panda_robot"));
+		} 
+		catch (const hardware_interface::HardwareInterfaceException& e) 
+		{
+			ROS_ERROR_STREAM("Failed to get Franka state handle: " << e.what());
+			return false;
+
+		}
 
         auto* effort_joint_interface = robot_hw->get<hardware_interface::EffortJointInterface>();
 
@@ -66,58 +84,6 @@ namespace linearmpc_panda {
 			<< "q_now: " << q_now_.transpose() << "\n"
 			<< "v_now: " << v_now_.transpose() << "\n"
 			<< "u_now: " << u_now_.transpose() << "\n");
-
-		// Wait for the first message (timeout after 1.0 sec)
-		//auto msg = ros::topic::waitForMessage<sensor_msgs::JointState>("/q_init_desired", nh_, ros::Duration(1.0));
-		//Eigen::Map<const Eigen::VectorXd> qd(msg->position.data(), msg->position.size());
-
-		//if (msg) {
-			//ROS_INFO_STREAM("q_init_desired received: " << qd.transpose());
-		//} else {
-			//ROS_WARN("No message received within timeout!");
-		//}
-
-        //// set the condition here to check if current robot state is close to x0_ref
-		//if (!initial_pose_ok(qd))
-		//{
-			//std_msgs::Bool q_init_ok_msg;
-			//q_init_ok_msg.data = false;
-			//q_init_flag_pub_.publish(q_init_ok_msg);
-			//ROS_WARN("Initial pose is not ok, set the flag to call service");
-
-			////block untial the robot reaches q_init_desired_
-			//ros::Rate rate(100); // 100 Hz
-			//while (ros::ok())
-			//{
-				////read joint states again in the loop
-				//Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> q_now_(robot_state_.q.data());
-				//Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> v_now_(robot_state_.dq.data());
-				//Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> u_now_(robot_state_.tau_J.data());
-				//auto msg = ros::topic::waitForMessage<sensor_msgs::JointState>("/q_init_desired", nh_, ros::Duration(1.0));
-
-				//if (!msg)
-				//{
-					//ROS_WARN("Waiting for /q_init_desired msg...");
-					//rate.sleep();
-					//continue;
-				//}
-
-				//Eigen::Map<const Eigen::VectorXd> qd(msg->position.data(), msg->position.size());
-				//if (initial_pose_ok(qd)) 
-				//{
-					//ROS_INFO("Initial pose is reached! Setting the flag...");
-					//q_init_ok_msg.data = true;
-					//q_init_flag_pub_.publish(q_init_ok_msg);
-					//break; // exit the loop when the initial pose is ok
-				//}
-				//else 
-				//{
-					//ROS_WARN("Waiting for q_init_desired to be reached...");
-					//rate.sleep();
-				//}
-			//}
-		//}
-
     }
 
 	//#######################################################################################
@@ -125,10 +91,13 @@ namespace linearmpc_panda {
 	{
 		if (!u_cmd_received_) 
 		{
-			ROS_WARN("No u_cmd received yet, sending zero torques to joints.");
+			ROS_WARN("No u_cmd received yet, sending g comp to joints.");
+			//auto g_comp = model_handle_->getGravity();
+
 			for (size_t i = 0; i < NUM_JOINTS; i++)
 			{
-				joint_handles_[i].setCommand(0.0);
+				//joint_handles_[i].setCommand(g_comp[i]); // Set gravity compensation torque
+				joint_handles_[i].setCommand(0.0); // Set zero torque if no command received
 			}
 		}
 
