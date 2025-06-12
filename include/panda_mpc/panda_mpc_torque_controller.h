@@ -48,7 +48,7 @@ namespace linearmpc_panda {
         bool initial_pose_ok(const Eigen::VectorXd& q_init_desired); 
 
         //
-        void q_init_callback(const std_msgs::Float64MultiArray::ConstPtr& msg);
+        //void q_init_callback(const sensor_msgs::JointState::ConstPtr& msg);
 
     private:
         ros::NodeHandle nh_;

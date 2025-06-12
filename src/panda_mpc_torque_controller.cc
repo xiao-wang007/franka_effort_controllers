@@ -128,7 +128,7 @@ namespace linearmpc_panda {
 			ROS_WARN("No u_cmd received yet, sending zero torques to joints.");
 			for (size_t i = 0; i < NUM_JOINTS; i++)
 			{
-				joint_handles_[i].SetCommand(0.0);
+				joint_handles_[i].setCommand(0.0);
 			}
 		}
 
@@ -185,20 +185,20 @@ namespace linearmpc_panda {
 	}
 
 	//#######################################################################################
-	void LinearMPCController::q_init_callback(const sensor_msgs::JointState::ConstPtr& msg) 
-	{
+	//void LinearMPCController::q_init_callback(const sensor_msgs::JointState::ConstPtr& msg) 
+	//{
 		
-		// ROS_INFO("checking inside executor_callback(), 1 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& \n");
-		//get the upsampled solution
-		if (msg->position.size() == 0)
-		{
-			return;
-		}
-		else
-		{
-			q_init_desired_ = Eigen::Map<const Eigen::VectorXd>(msg->position.data(), msg->position.size());
-		}
-	}
+		//// ROS_INFO("checking inside executor_callback(), 1 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& \n");
+		////get the upsampled solution
+		//if (msg->position.size() == 0)
+		//{
+			//return;
+		//}
+		//else
+		//{
+			//q_init_desired_ = Eigen::Map<const Eigen::VectorXd>(msg->position.data(), msg->position.size());
+		//}
+	//}
 
 } //namespace linearmpc_panda
 
