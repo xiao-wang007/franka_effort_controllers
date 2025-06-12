@@ -38,12 +38,12 @@ namespace linearmpc_panda {
         joint_handles_.push_back(effort_joint_interface->getHandle("panda_joint7"));
 
 
-		q_init_desired_sub_ = node_handle.subscribe("/q_init_desired", 1, &LinearMPCController::q_init_callback, this); 
+		//q_init_desired_sub_ = node_handle.subscribe("/q_init_desired", 1, &LinearMPCController::q_init_callback, this); 
 
 		//get upsampled solution trajectory, at hardware frequency 1kHz 
 		executor_sub_ = node_handle.subscribe("/upsampled_u_cmd", 1, &LinearMPCController::executor_callback, this);
 		// mpc_t_start_pub_ = node_handle.advertise<std_msgs::Time>("/mpc_t_start", 1, true); //True for latched publisher
-		q_init_flag_pub_ = node_handle.advertise<std_msgs::Bool>("/q_init_reached", 1, true); //True for latched publisher
+		//q_init_flag_pub_ = node_handle.advertise<std_msgs::Bool>("/q_init_reached", 1, true); //True for latched publisher
 
 		u_cmd_ = Eigen::VectorXd::Zero(NUM_JOINTS);
 
@@ -54,61 +54,69 @@ namespace linearmpc_panda {
 	//#######################################################################################
     void LinearMPCController::starting(const ros::Time& time) 
     {
+		robot_state_ = state_handle_->getRobotState();
 		
         // Convert current robot position and velocity into Eigen data storage
         Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> q_now_(robot_state_.q.data());
         Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> v_now_(robot_state_.dq.data());
 		Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> u_now_(robot_state_.tau_J.data());
+
+		// print current robot state just to notify
+		ROS_INFO_STREAM("Current robot state: \n"
+			<< "q_now: " << q_now_.transpose() << "\n"
+			<< "v_now: " << v_now_.transpose() << "\n"
+			<< "u_now: " << u_now_.transpose() << "\n");
+
 		// Wait for the first message (timeout after 1.0 sec)
-		auto msg = ros::topic::waitForMessage<sensor_msgs::JointState>("/q_init_desired", nh_, ros::Duration(1.0));
-		Eigen::Map<const Eigen::VectorXd> qd(msg->position.data(), msg->position.size());
+		//auto msg = ros::topic::waitForMessage<sensor_msgs::JointState>("/q_init_desired", nh_, ros::Duration(1.0));
+		//Eigen::Map<const Eigen::VectorXd> qd(msg->position.data(), msg->position.size());
 
-		if (msg) {
-			ROS_INFO_STREAM("q_init_desired received: " << qd.transpose());
-		} else {
-			ROS_WARN("No message received within timeout!");
-		}
+		//if (msg) {
+			//ROS_INFO_STREAM("q_init_desired received: " << qd.transpose());
+		//} else {
+			//ROS_WARN("No message received within timeout!");
+		//}
 
-        // set the condition here to check if current robot state is close to x0_ref
-		if (!initial_pose_ok(qd))
-		{
-			std_msgs::Bool q_init_ok_msg;
-			q_init_ok_msg.data = false;
-			q_init_flag_pub_.publish(q_init_ok_msg);
-			ROS_WARN("Initial pose is not ok, set the flag to call service");
+        //// set the condition here to check if current robot state is close to x0_ref
+		//if (!initial_pose_ok(qd))
+		//{
+			//std_msgs::Bool q_init_ok_msg;
+			//q_init_ok_msg.data = false;
+			//q_init_flag_pub_.publish(q_init_ok_msg);
+			//ROS_WARN("Initial pose is not ok, set the flag to call service");
 
-			//block untial the robot reaches q_init_desired_
-			ros::Rate rate(100); // 100 Hz
-			while (ros::ok())
-			{
-				//read joint states again in the loop
-				Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> q_now_(robot_state_.q.data());
-				Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> v_now_(robot_state_.dq.data());
-				Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> u_now_(robot_state_.tau_J.data());
-				auto msg = ros::topic::waitForMessage<sensor_msgs::JointState>("/q_init_desired", nh_, ros::Duration(1.0));
+			////block untial the robot reaches q_init_desired_
+			//ros::Rate rate(100); // 100 Hz
+			//while (ros::ok())
+			//{
+				////read joint states again in the loop
+				//Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> q_now_(robot_state_.q.data());
+				//Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> v_now_(robot_state_.dq.data());
+				//Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> u_now_(robot_state_.tau_J.data());
+				//auto msg = ros::topic::waitForMessage<sensor_msgs::JointState>("/q_init_desired", nh_, ros::Duration(1.0));
 
-				if (!msg)
-				{
-					ROS_WARN("Waiting for /q_init_desired msg...");
-					rate.sleep();
-					continue;
-				}
+				//if (!msg)
+				//{
+					//ROS_WARN("Waiting for /q_init_desired msg...");
+					//rate.sleep();
+					//continue;
+				//}
 
-				Eigen::Map<const Eigen::VectorXd> qd(msg->position.data(), msg->position.size());
-				if (initial_pose_ok(qd)) 
-				{
-					ROS_INFO("Initial pose is reached! Setting the flag...");
-					q_init_ok_msg.data = true;
-					q_init_flag_pub_.publish(q_init_ok_msg);
-					break; // exit the loop when the initial pose is ok
-				}
-				else 
-				{
-					ROS_WARN("Waiting for q_init_desired to be reached...");
-					rate.sleep();
-				}
-			}
-		}
+				//Eigen::Map<const Eigen::VectorXd> qd(msg->position.data(), msg->position.size());
+				//if (initial_pose_ok(qd)) 
+				//{
+					//ROS_INFO("Initial pose is reached! Setting the flag...");
+					//q_init_ok_msg.data = true;
+					//q_init_flag_pub_.publish(q_init_ok_msg);
+					//break; // exit the loop when the initial pose is ok
+				//}
+				//else 
+				//{
+					//ROS_WARN("Waiting for q_init_desired to be reached...");
+					//rate.sleep();
+				//}
+			//}
+		//}
 
     }
 
@@ -117,8 +125,11 @@ namespace linearmpc_panda {
 	{
 		if (!u_cmd_received_) 
 		{
-			ROS_WARN("No u_cmd received yet, skipping update.");
-			return; // Skip update if no command has been received
+			ROS_WARN("No u_cmd received yet, sending zero torques to joints.");
+			for (size_t i = 0; i < NUM_JOINTS; i++)
+			{
+				joint_handles_[i].SetCommand(0.0);
+			}
 		}
 
 		Eigen::VectorXd u_cmd_copy;

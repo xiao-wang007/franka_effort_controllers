@@ -55,9 +55,9 @@ namespace linearmpc_panda {
         /* TODO: make the matrix or vector size explicit where possible! Some are dependent on 
                  MPC loop parameters, find a way to fix its size accordingly in the constructor */
         ros::Subscriber executor_sub_; // sub to set u_cmd at 1kHz
-        ros::Subscriber q_init_desired_sub_; // use this to check if the tracking is ready to be started
+        //ros::Subscriber q_init_desired_sub_; // use this to check if the tracking is ready to be started
         ros::Publisher mpc_t_start_pub_;
-        ros::Publisher q_init_flag_pub_;        
+        //ros::Publisher q_init_flag_pub_;        
         
         std::unique_ptr <franka_hw::FrankaModelHandle> model_handle_;
         std::unique_ptr <franka_hw::FrankaStateHandle> state_handle_;
