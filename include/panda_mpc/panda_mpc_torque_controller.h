@@ -48,7 +48,7 @@ namespace linearmpc_panda {
         bool initial_pose_ok(const Eigen::VectorXd& q_init_desired); 
 
         //
-        //void q_init_callback(const sensor_msgs::JointState::ConstPtr& msg);
+        void saturateTorqueRate(Eigen::VectorXd& u_cmd, const std::array<double, 7>& tau_J_d);
 
     private:
         ros::NodeHandle nh_;
@@ -72,6 +72,7 @@ namespace linearmpc_panda {
         // std_msgs::Time mpc_t_start_msg_ {};
         Eigen::VectorXd q_init_desired_ {};
         bool u_cmd_received_ {false};
+        double dtau_up_ {1.};
 
     };
 } // namespace linearmpc_panda

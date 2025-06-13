@@ -56,12 +56,8 @@ namespace linearmpc_panda {
         joint_handles_.push_back(effort_joint_interface->getHandle("panda_joint7"));
 
 
-		//q_init_desired_sub_ = node_handle.subscribe("/q_init_desired", 1, &LinearMPCController::q_init_callback, this); 
-
 		//get upsampled solution trajectory, at hardware frequency 1kHz 
 		executor_sub_ = node_handle.subscribe("/upsampled_u_cmd", 1, &LinearMPCController::executor_callback, this);
-		// mpc_t_start_pub_ = node_handle.advertise<std_msgs::Time>("/mpc_t_start", 1, true); //True for latched publisher
-		//q_init_flag_pub_ = node_handle.advertise<std_msgs::Bool>("/q_init_reached", 1, true); //True for latched publisher
 
 		u_cmd_ = Eigen::VectorXd::Zero(NUM_JOINTS);
 
@@ -91,7 +87,7 @@ namespace linearmpc_panda {
 	{
 		if (!u_cmd_received_) 
 		{
-			ROS_WARN("No u_cmd received yet, sending g comp to joints.");
+			ROS_WARN_THROTTLE(1.0, "No u_cmd received yet, sending zero torques to joints.");
 			//auto g_comp = model_handle_->getGravity();
 
 			for (size_t i = 0; i < NUM_JOINTS; i++)
@@ -101,16 +97,25 @@ namespace linearmpc_panda {
 			}
 		}
 
+		franka::RobotState robot_state = state_handle_->getRobotState();
+
+
 		Eigen::VectorXd u_cmd_copy;
 		{
 			std::lock_guard<std::mutex> lock(u_cmd_mutex_);
 			u_cmd_copy = u_cmd_;
 		}
 
+		// avoid saturating the torque rate
+		this->saturateTorqueRate(u_cmd_copy, robot_state.tau_J_d);
+
 		for (size_t i = 0; i < NUM_JOINTS; i++) 
 		{
-			joint_handles_[i].setCommand(u_cmd_copy[i]); //u_cmd_ is from the sub
+			joint_handles_[i].setCommand(u_cmd_copy(i)); //u_cmd_ is from the sub
 		}
+
+		// reset the flag after sending the command
+		u_cmd_received_ = false;
 
     }
 
@@ -141,33 +146,20 @@ namespace linearmpc_panda {
 		
 		// ROS_INFO("checking inside executor_callback(), 1 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& \n");
 		//get the upsampled solution
-		if (!u_cmd_received_)
-		{
-			return;
-		}
-		else
-		{
-			std::lock_guard<std::mutex> lock(u_cmd_mutex_);
-			u_cmd_ = Eigen::Map<const Eigen::VectorXd>(dim7_vec_msg->data.data(), dim7_vec_msg->data.size());
-			u_cmd_received_ = true;
-		}
+		std::lock_guard<std::mutex> lock(u_cmd_mutex_);
+		u_cmd_ = Eigen::Map<const Eigen::VectorXd>(dim7_vec_msg->data.data(), dim7_vec_msg->data.size());
+		u_cmd_received_ = true;
 	}
 
 	//#######################################################################################
-	//void LinearMPCController::q_init_callback(const sensor_msgs::JointState::ConstPtr& msg) 
-	//{
-		
-		//// ROS_INFO("checking inside executor_callback(), 1 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& \n");
-		////get the upsampled solution
-		//if (msg->position.size() == 0)
-		//{
-			//return;
-		//}
-		//else
-		//{
-			//q_init_desired_ = Eigen::Map<const Eigen::VectorXd>(msg->position.data(), msg->position.size());
-		//}
-	//}
+	void LinearMPCController::saturateTorqueRate(Eigen::VectorXd& tau_cmd, const std::array<double, 7>& tau_measured)
+	{
+		for (size_t i = 0; i < NUM_JOINTS, i++)
+		{
+			double diff = tau_cmd(i) - tau_measured[i];
+			tau_cmd(i) = tau_measured[i] + std::max(std::min(diff, dtau_up_), -dtau_up_);
+		}
+	}
 
 } //namespace linearmpc_panda
 
