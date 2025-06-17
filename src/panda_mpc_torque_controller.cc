@@ -74,6 +74,7 @@ namespace linearmpc_panda {
 		{
 			publish_tau_J_d_loop();
 		});
+		tau_J_d_pub_thread_.detach();
 
 		robot_state_ = state_handle_->getRobotState();
 		
@@ -122,8 +123,10 @@ namespace linearmpc_panda {
 		}
 
 		franka::RobotState robot_state = state_handle_->getRobotState();
-		tau_J_d_queue_.push(robot_state.tau_J_d);
-
+		if (!tau_J_d_queue_.push(robot_state.tau_J_d)) 
+		{
+			ROS_WARN_THROTTLE(1.0, "tau_J_d_queue_ is full, dropping the oldest command.");
+		}
 
 		Eigen::VectorXd u_cmd_copy;
 		{
