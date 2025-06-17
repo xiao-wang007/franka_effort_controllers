@@ -65,7 +65,7 @@ namespace linearmpc_panda {
                  MPC loop parameters, find a way to fix its size accordingly in the constructor */
         ros::Subscriber executor_sub_; // sub to set u_cmd at 1kHz
         ros::Publisher mpc_t_start_pub_;
-        ros::tau_J_d_pub_;
+        ros::Publisher tau_J_d_pub_;
         std::thread tau_J_d_pub_thread_;
         boost::lockfree::spsc_queue<std::array<double, 7>, boost::lockfree::capacity<128>> tau_J_d_queue_;
 

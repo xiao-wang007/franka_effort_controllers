@@ -179,7 +179,7 @@ namespace linearmpc_panda {
 	//#######################################################################################
 	void LinearMPCController::saturateTorqueRate(Eigen::VectorXd& tau_cmd, const std::array<double, 7>& tau_measured)
 	{
-		for (size_t i = 0; i < NUM_JOINTS, i++)
+		for (size_t i = 0; i < NUM_JOINTS; i++)
 		{
 			double diff = tau_cmd(i) - tau_measured[i];
 			tau_cmd(i) = tau_measured[i] + std::max(std::min(diff, dtau_up_), -dtau_up_);
@@ -188,12 +188,12 @@ namespace linearmpc_panda {
 
 
 	//#######################################################################################
-	void stopping()
+	void LinearMPCController::stopping()
 	{
 		running_ = false;
-		if (publish_tau_J_d_thread_.joinable()) 
+		if (tau_J_d_pub_thread_.joinable()) 
 		{
-			publish_tau_J_d_thread_.join();
+			tau_J_d_pub_thread_.join();
 		}
 	}
 
