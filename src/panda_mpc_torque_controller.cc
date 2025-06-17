@@ -58,6 +58,7 @@ namespace linearmpc_panda {
 
 		//get upsampled solution trajectory, at hardware frequency 1kHz 
 		executor_sub_ = node_handle.subscribe("/upsampled_u_cmd", 1, &LinearMPCController::executor_callback, this);
+		tau_J_d_pub_ = node_handle.advertise<std_msgs::Float64MultiArray>("/tau_J_d", 1);
 
 		u_cmd_ = Eigen::VectorXd::Zero(NUM_JOINTS);
 
@@ -68,6 +69,12 @@ namespace linearmpc_panda {
 	//#######################################################################################
     void LinearMPCController::starting(const ros::Time& time) 
     {
+		running_ = true;
+		tau_J_d_pub_thread_ = std::thread([this]() 
+		{
+			publish_tau_J_d_loop();
+		});
+
 		robot_state_ = state_handle_->getRobotState();
 		
         // Convert current robot position and velocity into Eigen data storage
@@ -81,6 +88,23 @@ namespace linearmpc_panda {
 			<< "v_now: " << v_now_.transpose() << "\n"
 			<< "u_now: " << u_now_.transpose() << "\n");
     }
+
+	//#######################################################################################
+	void LinearMPCController::publish_tau_J_d_loop() 
+	{ 
+		std_msgs::Float64MultiArray msg;
+		while (running_) 
+		{
+			std::array<double, 7> tau;
+			while (tau_J_d_queue_.pop(tau)) 
+			{
+				msg.data.assign(tau.begin(), tau.end());
+				tau_J_d_pub_.publish(msg);
+			}
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));  // or use ros::Rate
+		}
+	}
+
 
 	//#######################################################################################
     void LinearMPCController::update(const ros::Time& time, const ros::Duration& period) 
@@ -98,6 +122,7 @@ namespace linearmpc_panda {
 		}
 
 		franka::RobotState robot_state = state_handle_->getRobotState();
+		tau_J_d_queue_.push(robot_state.tau_J_d);
 
 
 		Eigen::VectorXd u_cmd_copy;
@@ -158,6 +183,17 @@ namespace linearmpc_panda {
 		{
 			double diff = tau_cmd(i) - tau_measured[i];
 			tau_cmd(i) = tau_measured[i] + std::max(std::min(diff, dtau_up_), -dtau_up_);
+		}
+	}
+
+
+	//#######################################################################################
+	void stopping()
+	{
+		running_ = false;
+		if (publish_tau_J_d_thread_.joinable()) 
+		{
+			publish_tau_J_d_thread_.join();
 		}
 	}
 

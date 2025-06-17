@@ -1,6 +1,9 @@
 #pragma once
 
 #include <mutex>
+#include <thread>
+#include <atomic>
+#include <boost/lockfree/spsc_queue.hpp>
 #include <optional>
 #include <sensor_msgs/JointState.h> //this is generic ROS message header, needed for gazebo sim
 #include <std_msgs/Bool.h>
@@ -50,15 +53,22 @@ namespace linearmpc_panda {
         //
         void saturateTorqueRate(Eigen::VectorXd& u_cmd, const std::array<double, 7>& tau_J_d);
 
+        //
+        void publish_tau_J_d_loop();
+
+        // 
+        void stopping();
+
     private:
         ros::NodeHandle nh_;
         /* TODO: make the matrix or vector size explicit where possible! Some are dependent on 
                  MPC loop parameters, find a way to fix its size accordingly in the constructor */
         ros::Subscriber executor_sub_; // sub to set u_cmd at 1kHz
-        //ros::Subscriber q_init_desired_sub_; // use this to check if the tracking is ready to be started
         ros::Publisher mpc_t_start_pub_;
-        //ros::Publisher q_init_flag_pub_;        
-        
+        ros::tau_J_d_pub_;
+        std::thread tau_J_d_pub_thread_;
+        boost::lockfree::spsc_queue<std::array<double, 7>, boost::lockfree::capacity<128>> tau_J_d_queue_;
+
         std::unique_ptr <franka_hw::FrankaModelHandle> model_handle_;
         std::unique_ptr <franka_hw::FrankaStateHandle> state_handle_;
         std::vector<hardware_interface::JointHandle> joint_handles_;
@@ -73,6 +83,8 @@ namespace linearmpc_panda {
         Eigen::VectorXd q_init_desired_ {};
         bool u_cmd_received_ {false};
         double dtau_up_ {1.};
+
+        std::atomic<bool> running_ {false};
 
     };
 } // namespace linearmpc_panda
