@@ -140,7 +140,7 @@ namespace linearmpc_panda {
 		}
 
 		// reset the flag after sending the command
-		u_cmd_received_ = false;
+		//u_cmd_received_ = false;
 
     }
 
