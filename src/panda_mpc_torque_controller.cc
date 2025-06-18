@@ -59,9 +59,14 @@ namespace linearmpc_panda {
 		//get upsampled solution trajectory, at hardware frequency 1kHz 
 		executor_sub_ = node_handle.subscribe("/upsampled_u_cmd", 1, &LinearMPCController::executor_callback, this);
 		tau_J_d_pub_ = node_handle.advertise<std_msgs::Float64MultiArray>("/tau_J_d", 1);
-		q_init_desired_sub_ = node_handle.subscribe("/q_init_desired", 1, &LinearMPCController::q_init_desired_callback, this);
+		q_init_desired_sub_ = node_handle.subscribe("/x_init_desired", 1, &LinearMPCController::x_init_desired_callback, this);
 
 		u_cmd_ = Eigen::VectorXd::Zero(NUM_JOINTS);
+
+		kp_.resize(NUM_JOINTS);
+		kp_ << 300., 300., 300., 300., 250., 150., 50.;
+		kd_.resize(NUM_JOINTS);
+		kd_ << 30., 30., 30., 30., 10., 10., 5.;
 
 		ROS_INFO("\n Linear MPC Controller initialized successfully. xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx \n");
         return true;
@@ -115,11 +120,14 @@ namespace linearmpc_panda {
 		Eigen::VectorXd q_now = Eigen::Map<const Eigen::VectorXd>(robot_state.q.data(), NUM_JOINTS);
 		Eigen::VectorXd v_now = Eigen::Map<const Eigen::VectorXd>(robot_state.dq.data(), NUM_JOINTS);
 
+		if (!tau_J_d_queue_.push(robot_state.tau_J_d)) 
+		{
+			ROS_WARN_THROTTLE(1.0, "tau_J_d_queue_ is full, dropping the oldest command.");
+		}
+
 		if (!u_cmd_received_) 
 		{
-			ROS_WARN_THROTTLE(1.0, "No u_cmd received yet, sending zero torques to joints.");
 			//auto g_comp = model_handle_->getGravity();
-
 
 			/* if use auto here, the type is CwiseBinaryOp. But with explicity type of Eigen::VectorXd
 			   Eigen to evaluate the expression immediately and store the result as a concrete 
@@ -128,21 +136,24 @@ namespace linearmpc_panda {
 			   the actual computation into memory. */
 			//auto tau_stabilization = kp_.array() * (q_init_desired_ - q_now).array() 
 								     //+ kd_.array() * (v_init_desired_ - v_now).array();
-			Eigen::VectorXd tau_stabilization = kp_.array() * (q_init_desired_ - q_now).array() 
-								                + kd_.array() * (v_init_desired_ - v_now).array();
-			this->saturateTorqueRate(tau_stabilization, robot_state.tau_J_d);
-
-			for (size_t i = 0; i < NUM_JOINTS; i++)
+			if (x_init_desired_received_)
 			{
-				//joint_handles_[i].setCommand(g_comp[i]); // Set gravity compensation torque
-				//joint_handles_[i].setCommand(0.0); // Set zero torque if no command received
-				joint_handles_[i].setCommand(tau_stabilization(i)); // Set zero torque if no command received
-			}
-		}
+				ROS_WARN_THROTTLE(1.0, "No u_cmd received, sending torques to stabilize at x_init_desired.");
+				Eigen::VectorXd tau_stabilization = kp_.array() * (q_init_desired_ - q_now).array() 
+													+ kd_.array() * (v_init_desired_ - v_now).array();
+				this->saturateTorqueRate(tau_stabilization, robot_state.tau_J_d);
 
-		if (!tau_J_d_queue_.push(robot_state.tau_J_d)) 
-		{
-			ROS_WARN_THROTTLE(1.0, "tau_J_d_queue_ is full, dropping the oldest command.");
+				for (size_t i = 0; i < NUM_JOINTS; i++)
+				{
+					joint_handles_[i].setCommand(tau_stabilization(i)); 
+				}
+			} else {
+				ROS_WARN_THROTTLE(1.0, "No u_cmd received and no x_init_desired received yet, sending zero torques to joints.");
+				for (size_t i = 0; i < NUM_JOINTS; i++)
+				{
+					joint_handles_[i].setCommand(0.0); // Set zero torque if no command received and no initial pose desired
+				}
+			}
 		}
 
 		Eigen::VectorXd u_cmd_copy;
@@ -197,7 +208,7 @@ namespace linearmpc_panda {
 	}
 
 	//#######################################################################################
-    void LinearMPCController::q_init_desired_callback(const sensor_msgs::JointState::ConstPtr& msg)
+    void LinearMPCController::x_init_desired_callback(const sensor_msgs::JointState::ConstPtr& msg)
 	{
 		q_init_desired_.resize(NUM_JOINTS);
 		v_init_desired_.resize(NUM_JOINTS);
@@ -206,15 +217,16 @@ namespace linearmpc_panda {
 		
 		ROS_INFO_STREAM("Received q_init_desired: " << q_init_desired_.transpose() << "\n"
 		<< "Received v_init_desired: " << v_init_desired_.transpose() << "\n");
+		x_init_desired_received_ = true;
 	}
 
 	//#######################################################################################
-	void LinearMPCController::saturateTorqueRate(Eigen::VectorXd& tau_cmd, const std::array<double, 7>& tau_measured)
+	void LinearMPCController::saturateTorqueRate(Eigen::VectorXd& tau_cmd, const std::array<double, 7>& tau_last)
 	{
 		for (size_t i = 0; i < NUM_JOINTS; i++)
 		{
-			double diff = tau_cmd(i) - tau_measured[i];
-			tau_cmd(i) = tau_measured[i] + std::max(std::min(diff, dtau_up_), -dtau_up_);
+			double diff = tau_cmd(i) - tau_last[i];
+			tau_cmd(i) = tau_last[i] + std::max(std::min(diff, dtau_up_), -dtau_up_);
 		}
 	}
 

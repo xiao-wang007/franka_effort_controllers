@@ -60,7 +60,7 @@ namespace linearmpc_panda {
         void stopping();
 
         // 
-        void q_init_desired_callback(const sensor_msgs::JointState::ConstPtr& msg);
+        void x_init_desired_callback(const sensor_msgs::JointState::ConstPtr& msg);
 
     private:
         ros::NodeHandle nh_;
@@ -85,13 +85,14 @@ namespace linearmpc_panda {
         std::mutex u_cmd_mutex_;
         // std_msgs::Time mpc_t_start_msg_ {};
         bool u_cmd_received_ {false};
+        bool x_init_desired_received_ {false};
         double dtau_up_ {1.};
 
         std::atomic<bool> running_ {false};
         Eigen::VectorXd q_init_desired_ {};
         Eigen::VectorXd v_init_desired_ {};
-        Eigen::VectorXd kp_ {Eigen::VectorXd::Constant(NUM_JOINTS, 10.0)};
-        Eigen::VectorXd kd_ {Eigen::VectorXd::Constant(NUM_JOINTS, 1.0)};
+        Eigen::VectorXd kp_ {};
+        Eigen::VectorXd kd_ {};
 
     };
 } // namespace linearmpc_panda
