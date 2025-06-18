@@ -59,11 +59,15 @@ namespace linearmpc_panda {
         // 
         void stopping();
 
+        // 
+        void q_init_desired_callback(const sensor_msgs::JointState::ConstPtr& msg);
+
     private:
         ros::NodeHandle nh_;
         /* TODO: make the matrix or vector size explicit where possible! Some are dependent on 
                  MPC loop parameters, find a way to fix its size accordingly in the constructor */
         ros::Subscriber executor_sub_; // sub to set u_cmd at 1kHz
+        ros::Subscriber q_init_desired_sub_;
         ros::Publisher mpc_t_start_pub_;
         ros::Publisher tau_J_d_pub_;
         std::thread tau_J_d_pub_thread_;
@@ -80,11 +84,14 @@ namespace linearmpc_panda {
         Eigen::VectorXd u_cmd_ {};
         std::mutex u_cmd_mutex_;
         // std_msgs::Time mpc_t_start_msg_ {};
-        Eigen::VectorXd q_init_desired_ {};
         bool u_cmd_received_ {false};
         double dtau_up_ {1.};
 
         std::atomic<bool> running_ {false};
+        Eigen::VectorXd q_init_desired_ {};
+        Eigen::VectorXd v_init_desired_ {};
+        Eigen::VectorXd kp_ {Eigen::VectorXd::constant(NUM_JOINTS, 10.0)};
+        Eigen::VectorXd kd_ {Eigen::VectorXd::constant(NUM_JOINTS, 1.0)};
 
     };
 } // namespace linearmpc_panda

@@ -59,6 +59,7 @@ namespace linearmpc_panda {
 		//get upsampled solution trajectory, at hardware frequency 1kHz 
 		executor_sub_ = node_handle.subscribe("/upsampled_u_cmd", 1, &LinearMPCController::executor_callback, this);
 		tau_J_d_pub_ = node_handle.advertise<std_msgs::Float64MultiArray>("/tau_J_d", 1);
+		q_init_desired_sub_ = node_handle.subscribe("/q_init_desired", 1, &LinearMPCController::q_init_desired_callback, this);
 
 		u_cmd_ = Eigen::VectorXd::Zero(NUM_JOINTS);
 
@@ -110,19 +111,27 @@ namespace linearmpc_panda {
 	//#######################################################################################
     void LinearMPCController::update(const ros::Time& time, const ros::Duration& period) 
 	{
+		franka::RobotState robot_state = state_handle_->getRobotState();
+		Eigen::VectorXd q_now = Eigen::Map<const Eigen::VectorXd>(robot_state.q.data(), NUM_JOINTS);
+		Eigen::VectorXd v_now = Eigen::Map<const Eigen::VectorXd>(robot_state.dq.data(), NUM_JOINTS);
+
 		if (!u_cmd_received_) 
 		{
 			ROS_WARN_THROTTLE(1.0, "No u_cmd received yet, sending zero torques to joints.");
 			//auto g_comp = model_handle_->getGravity();
 
+
+			auto tau_stabilization = kp_.array() * (q_init_desired_ - q_now) + kd_.array() * (v_init_desired_ - v_now);
+			this->saturateTorqueRate(tau_stabilization, robot_state.tau_J_d);
+
 			for (size_t i = 0; i < NUM_JOINTS; i++)
 			{
 				//joint_handles_[i].setCommand(g_comp[i]); // Set gravity compensation torque
-				joint_handles_[i].setCommand(0.0); // Set zero torque if no command received
+				//joint_handles_[i].setCommand(0.0); // Set zero torque if no command received
+				joint_handles_[i].setCommand(tau_stabilization(i)); // Set zero torque if no command received
 			}
 		}
 
-		franka::RobotState robot_state = state_handle_->getRobotState();
 		if (!tau_J_d_queue_.push(robot_state.tau_J_d)) 
 		{
 			ROS_WARN_THROTTLE(1.0, "tau_J_d_queue_ is full, dropping the oldest command.");
@@ -177,6 +186,18 @@ namespace linearmpc_panda {
 		std::lock_guard<std::mutex> lock(u_cmd_mutex_);
 		u_cmd_ = Eigen::Map<const Eigen::VectorXd>(dim7_vec_msg->data.data(), dim7_vec_msg->data.size());
 		u_cmd_received_ = true;
+	}
+
+	//#######################################################################################
+    void LinearMPCController::q_init_desired_callback(const sensor_msgs::JointState::ConstPtr& msg)
+	{
+		q_init_desired_.resize(NUM_JOINTS);
+		v_init_desired_.resize(NUM_JOINTS);
+		q_init_desired_ = Eigen::Map<const Eigen::VectorXd>(msg->position.data(), msg->position.size());
+		v_init_desired_ = Eigen::Map<const Eigen::VectorXd>(msg->velocity.data(), msg->velocity.size());
+		
+		ROS_INFO_STREAM("Received q_init_desired: " << q_init_desired_.transpose() << "\n"
+		<< "Received v_init_desired: " << v_init_desired_.transpose() << "\n");
 	}
 
 	//#######################################################################################
