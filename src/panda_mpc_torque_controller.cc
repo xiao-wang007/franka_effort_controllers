@@ -121,7 +121,15 @@ namespace linearmpc_panda {
 			//auto g_comp = model_handle_->getGravity();
 
 
-			auto tau_stabilization = kp_.array() * (q_init_desired_ - q_now) + kd_.array() * (v_init_desired_ - v_now);
+			/* if use auto here, the type is CwiseBinaryOp. But with explicity type of Eigen::VectorXd
+			   Eigen to evaluate the expression immediately and store the result as a concrete 
+			   Eigen::VectorXd object. This triggers Eigen’s implicit conversion operator, which 
+			   takes the lazily evaluated CwiseBinaryOp (the expression template) and performs 
+			   the actual computation into memory. */
+			//auto tau_stabilization = kp_.array() * (q_init_desired_ - q_now).array() 
+								     //+ kd_.array() * (v_init_desired_ - v_now).array();
+			Eigen::VectorXd tau_stabilization = kp_.array() * (q_init_desired_ - q_now).array() 
+								                + kd_.array() * (v_init_desired_ - v_now).array();
 			this->saturateTorqueRate(tau_stabilization, robot_state.tau_J_d);
 
 			for (size_t i = 0; i < NUM_JOINTS; i++)

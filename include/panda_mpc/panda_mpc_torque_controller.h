@@ -90,8 +90,8 @@ namespace linearmpc_panda {
         std::atomic<bool> running_ {false};
         Eigen::VectorXd q_init_desired_ {};
         Eigen::VectorXd v_init_desired_ {};
-        Eigen::VectorXd kp_ {Eigen::VectorXd::constant(NUM_JOINTS, 10.0)};
-        Eigen::VectorXd kd_ {Eigen::VectorXd::constant(NUM_JOINTS, 1.0)};
+        Eigen::VectorXd kp_ {Eigen::VectorXd::Constant(NUM_JOINTS, 10.0)};
+        Eigen::VectorXd kd_ {Eigen::VectorXd::Constant(NUM_JOINTS, 1.0)};
 
     };
 } // namespace linearmpc_panda
