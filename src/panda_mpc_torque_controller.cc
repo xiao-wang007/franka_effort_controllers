@@ -154,7 +154,7 @@ namespace linearmpc_panda {
 					joint_handles_[i].setCommand(0.0); // Set zero torque if no command received and no initial pose desired
 				}
 			}
-		}
+		} 
 
 		Eigen::VectorXd u_cmd_copy;
 		{
@@ -169,10 +169,8 @@ namespace linearmpc_panda {
 		{
 			joint_handles_[i].setCommand(u_cmd_copy(i)); //u_cmd_ is from the sub
 		}
-
 		// reset the flag after sending the command
 		//u_cmd_received_ = false;
-
     }
 
 	//#######################################################################################
