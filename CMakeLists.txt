@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.4)
-project(panda_mpc)
+project(panda_torque_controllers)
 
 set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_STANDARD 14)
@@ -43,7 +43,7 @@ generate_messages()
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES panda_mpc
+  LIBRARIES panda_torque_controllers
   CATKIN_DEPENDS
     controller_interface
     dynamic_reconfigure
@@ -64,11 +64,12 @@ catkin_package(
   DEPENDS Franka
 )
 
-add_library(panda_mpc
+add_library(panda_torque_controllers
   src/panda_mpc_torque_controller.cc
+  src/panda_torque_controller.cc
 )
 
-add_dependencies(panda_mpc
+add_dependencies(panda_torque_controllers
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
   ${PROJECT_NAME}_generate_messages_cpp
@@ -76,23 +77,23 @@ add_dependencies(panda_mpc
   # ${PROJECT_NAME}_gencfg
 )
 
-target_link_libraries(panda_mpc PUBLIC
+target_link_libraries(panda_torque_controllers PUBLIC
   ${Franka_LIBRARIES}
   ${catkin_LIBRARIES}
 )
 
-target_include_directories(panda_mpc SYSTEM PUBLIC
+target_include_directories(panda_torque_controllers SYSTEM PUBLIC
   ${Franka_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
 )
-target_include_directories(panda_mpc PUBLIC
+target_include_directories(panda_torque_controllers PUBLIC
   include
 )
 
 
 ## Installation
-install(TARGETS panda_mpc
+install(TARGETS panda_torque_controllers
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -106,11 +107,11 @@ install(DIRECTORY launch
 install(DIRECTORY config
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
-install(FILES panda_mpc_controller_plugins.xml
+install(FILES panda_torque_controllers_controller_plugins.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 # #this is same as above
-# pluginlib_export_plugin_description_file(controller_interface panda_mpc_controller_plugins.xml)
+# pluginlib_export_plugin_description_file(controller_interface panda_torque_controllers_controller_plugins.xml)
 
 # catkin_install_python(
 #   PROGRAMS scripts/interactive_marker.py scripts/move_to_start.py scripts/dual_arm_interactive_marker.py
@@ -127,10 +128,10 @@ if(CLANG_TOOLS)
     ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
   )
-  add_format_target(panda_mpc FILES ${SOURCES} ${HEADERS})
-  add_tidy_target(panda_mpc
+  add_format_target(panda_torque_controllers FILES ${SOURCES} ${HEADERS})
+  add_tidy_target(panda_torque_controllers
     FILES ${SOURCES}
-    DEPENDS panda_mpc
+    DEPENDS panda_torque_controllers
   )
 endif()
 
