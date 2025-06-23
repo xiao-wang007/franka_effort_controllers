@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>panda_mpc</name>
+  <name>panda_torque_controllers</name>
   <version>0.10.1</version>
   <description>fetches u_cmd from an MPC solver node at hardware rates by subscription</description>
   <maintainer email="scsxwang@leeds.ac.uk">Xiao Wang</maintainer>

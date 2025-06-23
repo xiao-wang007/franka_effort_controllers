@@ -50,9 +50,9 @@ bool MPCTorqueController::init(hardware_interface::RobotHW* robot_hw, ros::NodeH
   for (int i = 0; i < NUM_JOINTS; ++i) 
   { 
     try {
-       joint_handles_.push_back(effort_joint_interface->getHandle())
+       joint_handles_.push_back(effort_joint_interface->getHandle(joint_names_[i]));
     } catch (const hardware_interface::HardwareInterfaceException& ex) {
-        ROS_ERROR_STREAM("MPCTorqueController: Exception getting joint handles: " << ex.what())
+        ROS_ERROR_STREAM("MPCTorqueController: Exception getting joint handles: " << ex.what());
         return false;
     }
   }
@@ -67,7 +67,7 @@ bool MPCTorqueController::init(hardware_interface::RobotHW* robot_hw, ros::NodeH
 }
 
 //########################################################################################
-void MPCTorqueController::Starting(const ros::Time& time) 
+void MPCTorqueController::starting(const ros::Time& time) 
 {
   franka::RobotState robot_state = state_handle_->getRobotState();
 
@@ -95,27 +95,28 @@ void MPCTorqueController::update(const ros::Time& time, const ros::Duration& per
   if (u_cmd_received_)
   {
     auto torque_cmd = u_cmd_buffer_.readFromRT(); 
-    Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> tau_d_calculated(torque_cmd.data());
+    Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> tau_d_calculated(torque_cmd->data());
 
     franka::RobotState robot_state = state_handle_->getRobotState();
     Eigen::Map<Eigen::Matrix<double, NUM_JOINTS, 1>> tau_J_d(robot_state.tau_J.data());
 
-    Eigen::VectorXd tau_cmd = saturateTorqueRate(tau_d_calculated, tau_J_d);
+    Eigen::VectorXd tau_cmd = this->SaturateTorqueRate(tau_d_calculated, tau_J_d);
 
     for (int i = 0; i < NUM_JOINTS; ++i) 
     {
         joint_handles_[i].setCommand(tau_cmd[i]);
     }
-  }
 
-  // Publish the torque command if the trigger rate allows it
-  if (trigger_rate_() && torque_publisher_.trylock())
-  {
-    for (size_t i = 0; i < NUM_JOINTS; ++i) 
+    // Publish the torque command if the trigger rate allows it
+    if (trigger_rate_() && torque_publisher_.trylock())
     {
-      torque_publisher_.msg_.data.push_back(tau_cmd[i]);
+      for (size_t i = 0; i < NUM_JOINTS; ++i) 
+      {
+        torque_publisher_.msg_.data.push_back(tau_cmd[i]);
+      }
     }
   }
+
 }
 
 //########################################################################################
@@ -129,7 +130,7 @@ void MPCTorqueController::u_cmd_callback(const std_msgs::Float64MultiArray::Cons
 
   // Convert the incoming message to an Eigen vector
   std::array<double, NUM_JOINTS> u_cmd;
-  std::copy_n(msg.data.begin(), NUM_JOINTS, u_cmd.begin());
+  std::copy_n(msg->data.begin(), NUM_JOINTS, u_cmd.begin());
 
   // Write the command to the realtime buffer
   u_cmd_buffer_.writeFromNonRT(u_cmd);
@@ -137,7 +138,7 @@ void MPCTorqueController::u_cmd_callback(const std_msgs::Float64MultiArray::Cons
 }
 
 //########################################################################################
-Eigen::Matrix<double, 7, 1> MPCTorqueController::saturateTorqueRate(
+Eigen::Matrix<double, 7, 1> MPCTorqueController::SaturateTorqueRate(
                             const Eigen::Matrix<double, 7, 1>& tau_d_calculated,
                             const Eigen::Matrix<double, 7, 1>& tau_J_d) 
 {  

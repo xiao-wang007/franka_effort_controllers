@@ -5,3 +5,11 @@
     </description>
   </class>
 </library>
+
+<library path="lib/libpanda_mpc">
+  <class name="panda_mpc/MPCTorqueController" type="franka_torque_controller::MPCTorqueController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      A controller that subs to an mpc tracking controller to fetch the u_cmd at hardware rate revised
+    </description>
+  </class>
+</library>

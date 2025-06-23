@@ -2,6 +2,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <realtime_tools/realtime_buffer.h>
+#include <Eigen/Dense>
 
 #include <controller_interface/multi_interface_controller.h>
 #include <hardware_interface/joint_command_interface.h>
@@ -9,6 +11,7 @@
 #include <realtime_tools/realtime_publisher.h>
 #include <ros/node_handle.h>
 #include <ros/time.h>
+#include <std_msgs/Float64MultiArray.h>
 
 //#include <franka_example_controllers/JointTorqueComparison.h>
 #include <franka_hw/franka_cartesian_command_interface.h>
@@ -35,15 +38,19 @@ class MPCTorqueController : public controller_interface::MultiInterfaceControlle
   //void stopping(const ros::Time& time) override;
 
  private:
-  std::array<double, 7> saturateTorqueRate(const std::array<double, 7>& tau_d_calculated,
-                                           const std::array<double, 7>& tau_J_d);
+  Eigen::Matrix<double, 7, 1> SaturateTorqueRate(
+                                    const Eigen::Matrix<double, 7, 1>& tau_d_calculated,
+                                    const Eigen::Matrix<double, 7, 1>& tau_J_d);
 
   void u_cmd_callback(const std_msgs::Float64MultiArray::ConstPtr& msg);
-  
 
   std::unique_ptr<franka_hw::FrankaModelHandle> model_handle_;
   std::unique_ptr<franka_hw::FrankaStateHandle> state_handle_;
   std::vector<hardware_interface::JointHandle> joint_handles_;
+  std::vector<std::string> joint_names_ {
+      "panda_joint1", "panda_joint2", "panda_joint3", 
+      "panda_joint4", "panda_joint5", "panda_joint6", "panda_joint7"
+  } ;
 
   franka_hw::TriggerRate trigger_rate_ {0.1}; // 10 Hz
   static constexpr double kMaxTorqueRate = 0.1; 
@@ -56,5 +63,5 @@ class MPCTorqueController : public controller_interface::MultiInterfaceControlle
   // sub and pub 
   ros::Subscriber u_cmd_subscriber_;
   realtime_tools::RealtimePublisher<std_msgs::Float64MultiArray> torque_publisher_;
-}
+};
 }
