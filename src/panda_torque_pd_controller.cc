@@ -89,7 +89,8 @@ void TorquePDController::starting(const ros::Time& time)
   auto loaded_q = load_csv(ref_traj_path_q_, N, nJoint);
   auto loaded_v = load_csv(ref_traj_path_v_, N, nJoint);
   auto loaded_u = load_csv(ref_traj_path_u_, N, nJoint);
-  auto loaded_h = load_csv(ref_traj_path_h_, N, 1);
+  auto loaded_h = load_csv(ref_traj_path_h_, N-1, 1);
+
 
   // compute time knots 
   std::vector<double> ts;
