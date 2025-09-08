@@ -107,11 +107,11 @@ install(DIRECTORY launch
 install(DIRECTORY config
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
-install(FILES panda_torque_controllers_controller_plugins.xml
+install(FILES panda_torque_controller_plugins.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 # #this is same as above
-pluginlib_export_plugin_description_file(controller_interface panda_torque_controller_plugins.xml)
+# pluginlib_export_plugin_description_file(controller_interface panda_torque_controller_plugins.xml)
 
 # catkin_install_python(
 #   PROGRAMS scripts/interactive_marker.py scripts/move_to_start.py scripts/dual_arm_interactive_marker.py
