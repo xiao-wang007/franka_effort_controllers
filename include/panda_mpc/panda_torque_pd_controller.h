@@ -174,13 +174,13 @@ class TorquePDController : public controller_interface::MultiInterfaceController
   std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/free_flight_test_u.csv"};
 
   // initialize the splines for q, v, u to be defined in starting() later
-  LinearSpline<Eigen::VectorXd> q_spline_;
-  LinearSpline<Eigen::VectorXd> v_spline_;
-  LinearSpline<Eigen::VectorXd> u_spline_;
+  LinearSpline<Vec7> q_spline_;
+  LinearSpline<Vec7> v_spline_;
+  LinearSpline<Vec7> u_spline_;
 
   // starting time 
   double t_traj_;
-  Eigen::VectorXd Kp_ = Eigen::VectorXd::Constant(NUM_JOINTS, 300.)
+  Eigen::VectorXd Kp_ = Eigen::VectorXd::Constant(NUM_JOINTS, 300.);
   Eigen::VectorXd Kd_ = Eigen::VectorXd::Constant(NUM_JOINTS, 200.);
 };
 }

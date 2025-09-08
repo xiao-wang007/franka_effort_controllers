@@ -142,7 +142,7 @@ void TorquePDController::starting(const ros::Time& time)
 void TorquePDController::update(const ros::Time& time, const ros::Duration& period) 
 {
   // get current state
-  franka::RobotState robot_state = cartesian_pose_handle_->getRobotState();
+  franka::RobotState robot_state = state_handle_->getRobotState();
   Eigen::Map<const Eigen::Matrix<double,7,1>> tau_J_d(robot_state.tau_J_d.data());
 
   // get time
