@@ -38,6 +38,6 @@
   <exec_depend>rospy</exec_depend>
 
   <export>
-    <controller_interface plugin="${prefix}/panda_mpc_controller_plugin.xml" />
+    <controller_interface plugin="${prefix}/panda_torque_controller_plugins.xml" />
   </export>
 </package>
