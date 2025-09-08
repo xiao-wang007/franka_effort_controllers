@@ -1,15 +1,24 @@
-<library path="lib/libpanda_mpc">
+<!-- <library path="lib/libpanda_mpc">
   <class name="panda_mpc/LinearMPCController" type="linearmpc_panda::LinearMPCController" base_class_type="controller_interface::ControllerBase">
     <description>
       A controller that subs to an mpc tracking controller to fetch the u_cmd at hardware rate
     </description>
   </class>
-</library>
+</library> -->
 
 <library path="lib/libpanda_mpc">
   <class name="panda_mpc/MPCTorqueController" type="franka_torque_controller::MPCTorqueController" base_class_type="controller_interface::ControllerBase">
     <description>
-      A controller that subs to an mpc tracking controller to fetch the u_cmd at hardware rate revised
+      A controller that subs to an mpc tracking controller to fetch the u_cmd at hardware rate (rate revised from default 30Hz to 1000Hz, 
+      but measured to be around 640Hz).
+    </description>
+  </class>
+</library>
+
+<library path="lib/libpanda_mpc">
+  <class name="panda_mpc/TorquePDController" type="franka_torque_controller::TorquePDController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      A controller that tracks q_ref, v_ref and u_ref. The ref trajs are constructed locally in the controller class.
     </description>
   </class>
 </library>

@@ -1,5 +1,17 @@
-panda_linearmpc_controller:
-    type: panda_mpc/LinearMPCController
+panda_mpc_torque_controller:
+    type: panda_mpc/MPCTorqueController
+    arm_id: panda
+    joint_names:
+        - panda_joint1
+        - panda_joint2
+        - panda_joint3
+        - panda_joint4
+        - panda_joint5
+        - panda_joint6
+        - panda_joint7
+
+panda_torque_pd_controller:
+    type: panda_mpc/TorquePDController
     arm_id: panda
     joint_names:
         - panda_joint1
