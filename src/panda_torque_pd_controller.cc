@@ -135,6 +135,12 @@ void TorquePDController::starting(const ros::Time& time)
   std::cout << "u_spline(0.0): " << u_spline_(0.0).transpose() << std::endl;
   std::cout << "u_spline(0.12): " << u_spline_(0.12).transpose() << std::endl;
 
+  // override the kp gain for joint 7 
+  //Kp_(6) = 10.;
+  Kd_(6) = 5.; // lower the kd gain for joint 7 kills the jittering
+  std::cout << "Kp: " << Kp_.transpose() << std::endl;
+  std::cout << "Kd: " << Kd_.transpose() << '\n' << std::endl;
+
   // get controller start time
   t_traj_ = 0.0; 
 }
@@ -154,13 +160,21 @@ void TorquePDController::update(const ros::Time& time, const ros::Duration& peri
   Eigen::VectorXd v_d = v_spline_(t_traj_);
   Eigen::VectorXd tau_ff = u_spline_(t_traj_);
 
+  // filter out joint7 velocity
+   for (size_t i = 0; i < 7; i++) {
+    dq_filtered_[i] = (1 - alpha_) * dq_filtered_[i] + alpha_ * robot_state.dq[i];
+  }
+
   // compute the torque
   Eigen::VectorXd tau_calculated(NUM_JOINTS);
   for(int i=0; i<NUM_JOINTS; i++)
   {
+    // tau_calculated(i) = tau_ff(i) 
+    //                   + Kp_(i) * (q_d(i) - robot_state.q[i]) 
+    //                   + Kd_(i) * (v_d(i) - robot_state.dq[i]);
     tau_calculated(i) = tau_ff(i) 
                       + Kp_(i) * (q_d(i) - robot_state.q[i]) 
-                      + Kd_(i) * (v_d(i) - robot_state.dq[i]);
+                      + Kd_(i) * (v_d(i) - dq_filtered_[i]);
   }
 
   // saturate the torque rate

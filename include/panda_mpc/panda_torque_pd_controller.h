@@ -180,7 +180,8 @@ class TorquePDController : public controller_interface::MultiInterfaceController
 
   // starting time 
   double t_traj_;
-  Eigen::VectorXd Kp_ = Eigen::VectorXd::Constant(NUM_JOINTS, 300.);
-  Eigen::VectorXd Kd_ = Eigen::VectorXd::Constant(NUM_JOINTS, 200.);
+  Eigen::VectorXd Kp_ = Eigen::VectorXd::Constant(NUM_JOINTS, 150.);
+  Eigen::VectorXd Kd_ = Eigen::VectorXd::Constant(NUM_JOINTS, 30.);
+  double alpha_ = 0.99;
 };
 }
