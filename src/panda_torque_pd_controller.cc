@@ -143,6 +143,7 @@ void TorquePDController::update(const ros::Time& time, const ros::Duration& peri
 {
   // get current state
   franka::RobotState robot_state = cartesian_pose_handle_->getRobotState();
+  Eigen::Map<const Eigen::Matrix<double,7,1>> tau_J_d(robot_state.tau_J_d.data());
 
   // get time
   t_traj_ += period.toSec();
@@ -162,7 +163,7 @@ void TorquePDController::update(const ros::Time& time, const ros::Duration& peri
   }
 
   // saturate the torque rate
-  Eigen::VectorXd tau_cmd = this->SaturateTorqueRate(tau_calculated, robot_state.tau_J_d);
+  Eigen::VectorXd tau_cmd = this->SaturateTorqueRate(tau_calculated, tau_J_d);
 
   for (int i = 0; i < NUM_JOINTS; ++i) 
   {
