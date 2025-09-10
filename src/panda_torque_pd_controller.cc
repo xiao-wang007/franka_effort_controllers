@@ -57,11 +57,18 @@ bool TorquePDController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHa
     }
   }
 
+  // init dq_filtered_
+  std::fill(dq_filtered_.begin(), dq_filtered_.end(), 0.0);
+
   // publish torque for debugging and analysis
   torque_publisher_.init(node_handle, "/torque_comparison", 1); //queue size 1
 
-  // init dq_filtered_
-  std::fill(dq_filtered_.begin(), dq_filtered_.end(), 0.0);
+  // init starting time publisher
+  start_time_publisher_ = node_handle.advertise<std_msgs::Float64>("/controller_t_start",
+                                                              1, true); // queue size 1, latched
+
+  // init trajectory completion publisher
+  traj_complete_pub_ = node_handle.advertise<std_msgs::Bool>("/trajectory_completion", 1, true); // latched
 
   return true;
 }
@@ -133,7 +140,7 @@ void TorquePDController::starting(const ros::Time& time)
   }
   u_spline_.reset(ts, us);
   std::cout << "u_spline(0.0): " << u_spline_(0.0).transpose() << std::endl;
-  std::cout << "u_spline(0.12): " << u_spline_(0.12).transpose() << std::endl;
+  std::cout << "u_spline(0.12): " << u_spline_(0.12).transpose() << '\n' << std::endl;
 
   // override the kp gain for joint 7 
   Kp_(0) = 50.;
@@ -142,7 +149,17 @@ void TorquePDController::starting(const ros::Time& time)
   std::cout << "Kp: " << Kp_.transpose() << std::endl;
   std::cout << "Kd: " << Kd_.transpose() << '\n' << std::endl;
 
-  // get controller start time
+  // publish the starting time
+  std_msgs::Float64 t_start_msg;
+  t_start_msg.data = time.toSec();
+  start_time_publisher_.publish(t_start_msg);
+
+  // set traj end time
+  traj_end_time_ = ts.back() + t_delay_;
+  ROS_INFO("Trajectory end time (with delay = 0.1s): %.3f seconds \n", traj_end_time_);
+  traj_complete_published_ = false;
+
+  // set controller start time
   t_traj_ = 0.0; 
 }
 
@@ -193,8 +210,17 @@ void TorquePDController::update(const ros::Time& time, const ros::Duration& peri
     {
       torque_publisher_.msg_.data.push_back(tau_cmd[i]);
     }
-  }
+  } /* forgot why I did this! Damn. */
 
+  // Check if trajectory is complete based on time
+  if (!traj_complete_published_ && t_traj_ >= traj_end_time_) 
+  {
+    std_msgs::Bool msg;
+    msg.data = true;
+    traj_complete_pub_.publish(msg);
+    traj_complete_published_ = true;
+    ROS_INFO("Trajectory complete at t=%.3f seconds", t_traj_);
+  }
 }
 
 //########################################################################################

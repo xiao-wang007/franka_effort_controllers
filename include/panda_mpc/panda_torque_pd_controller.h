@@ -196,6 +196,12 @@ class TorquePDController : public controller_interface::MultiInterfaceController
   Eigen::VectorXd Kp_ = Eigen::VectorXd::Constant(NUM_JOINTS, 15.);
   Eigen::VectorXd Kd_ = Eigen::VectorXd::Constant(NUM_JOINTS, 5.);
   double alpha_ = 0.99;
+
+  // add a publisher for the starting time
+  ros::Publisher start_time_publisher_;
+  ros::Publisher traj_completion_pub_;
+  double traj_completion_time_ = 0.0;
+  double t_delay_ = 0.1; // 100ms delay to ensure trajectory completion
 };
 }
 
