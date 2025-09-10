@@ -13,6 +13,8 @@
 #include <ros/node_handle.h>
 #include <ros/time.h>
 #include <std_msgs/Float64MultiArray.h>
+#include <std_msgs/Float64.h>
+#include <std_msgs/Bool.h>
 
 //#include <franka_example_controllers/JointTorqueComparison.h>
 #include <franka_hw/franka_cartesian_command_interface.h>
@@ -201,6 +203,7 @@ class TorquePDController : public controller_interface::MultiInterfaceController
   ros::Publisher start_time_publisher_;
   ros::Publisher traj_completion_pub_;
   double traj_completion_time_ = 0.0;
+  bool traj_complete_published_ = false;
   double t_delay_ = 0.1; // 100ms delay to ensure trajectory completion
 };
 }
