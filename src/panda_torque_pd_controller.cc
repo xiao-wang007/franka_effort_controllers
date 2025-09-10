@@ -68,7 +68,7 @@ bool TorquePDController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHa
                                                               1, true); // queue size 1, latched
 
   // init trajectory completion publisher
-  traj_complete_pub_ = node_handle.advertise<std_msgs::Bool>("/trajectory_completion", 1, true); // latched
+  traj_completion_pub_ = node_handle.advertise<std_msgs::Bool>("/trajectory_completion", 1, true); // latched
 
   return true;
 }
@@ -155,9 +155,9 @@ void TorquePDController::starting(const ros::Time& time)
   start_time_publisher_.publish(t_start_msg);
 
   // set traj end time
-  traj_end_time_ = ts.back() + t_delay_;
-  ROS_INFO("Trajectory end time (with delay = 0.1s): %.3f seconds \n", traj_end_time_);
-  traj_complete_published_ = false;
+  traj_completion_time_ = ts.back() + t_delay_;
+  ROS_INFO("Trajectory end time (with delay = 0.1s): %.3f seconds \n", traj_completion_time_);
+  traj_completion_published_ = false;
 
   // set controller start time
   t_traj_ = 0.0; 
@@ -213,12 +213,12 @@ void TorquePDController::update(const ros::Time& time, const ros::Duration& peri
   } /* forgot why I did this! Damn. */
 
   // Check if trajectory is complete based on time
-  if (!traj_complete_published_ && t_traj_ >= traj_end_time_) 
+  if (!traj_completion_published_ && t_traj_ >= traj_completion_time_) 
   {
     std_msgs::Bool msg;
     msg.data = true;
-    traj_complete_pub_.publish(msg);
-    traj_complete_published_ = true;
+    traj_completion_pub_.publish(msg);
+    traj_completion_published_ = true;
     ROS_INFO("Trajectory complete at t=%.3f seconds", t_traj_);
   }
 }
