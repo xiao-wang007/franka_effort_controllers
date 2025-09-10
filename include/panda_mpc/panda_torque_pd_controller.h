@@ -168,10 +168,23 @@ class TorquePDController : public controller_interface::MultiInterfaceController
   realtime_tools::RealtimePublisher<std_msgs::Float64MultiArray> torque_publisher_;
 
   // path for ref trajs
-  std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/free_flight_test_h.csv"};
-  std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/free_flight_test_q.csv"};
-  std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/free_flight_test_v.csv"};
-  std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/free_flight_test_u.csv"};
+  // task1
+  //std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/experiments/task1_N60_euler_hlow0.07_dtheta2.0/test1_N60_Euler_hlow0.07_h.csv"};
+  //std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/experiments/task1_N60_euler_hlow0.07_dtheta2.0/test1_N60_Euler_hlow0.07_q.csv"};
+  //std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/experiments/task1_N60_euler_hlow0.07_dtheta2.0/test1_N60_Euler_hlow0.07_v.csv"};
+  //std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/experiments/task1_N60_euler_hlow0.07_dtheta2.0/test1_N60_Euler_hlow0.07_u.csv"};
+ 
+  // task2
+  //std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/experiments/task2_N60_euler_hlow0.04_dtheta2.0/test2_N60_Euler_hlow0.04_h.csv"};
+  //std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/experiments/task2_N60_euler_hlow0.04_dtheta2.0/test2_N60_Euler_hlow0.04_q.csv"};
+  //std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/experiments/task2_N60_euler_hlow0.04_dtheta2.0/test2_N60_Euler_hlow0.04_v.csv"};
+  //std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/experiments/task2_N60_euler_hlow0.04_dtheta2.0/test2_N60_Euler_hlow0.04_u.csv"};
+ 
+  // task3
+  std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_h.csv"};
+  std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_q.csv"};
+  std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_v.csv"};
+  std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_u.csv"};
 
   // initialize the splines for q, v, u to be defined in starting() later
   LinearSpline<Vec7> q_spline_;
@@ -180,8 +193,10 @@ class TorquePDController : public controller_interface::MultiInterfaceController
 
   // starting time 
   double t_traj_;
-  Eigen::VectorXd Kp_ = Eigen::VectorXd::Constant(NUM_JOINTS, 150.);
-  Eigen::VectorXd Kd_ = Eigen::VectorXd::Constant(NUM_JOINTS, 30.);
+  Eigen::VectorXd Kp_ = Eigen::VectorXd::Constant(NUM_JOINTS, 15.);
+  Eigen::VectorXd Kd_ = Eigen::VectorXd::Constant(NUM_JOINTS, 5.);
   double alpha_ = 0.99;
 };
 }
+
+

@@ -136,6 +136,7 @@ void TorquePDController::starting(const ros::Time& time)
   std::cout << "u_spline(0.12): " << u_spline_(0.12).transpose() << std::endl;
 
   // override the kp gain for joint 7 
+  Kp_(0) = 50.;
   //Kp_(6) = 10.;
   Kd_(6) = 5.; // lower the kd gain for joint 7 kills the jittering
   std::cout << "Kp: " << Kp_.transpose() << std::endl;
