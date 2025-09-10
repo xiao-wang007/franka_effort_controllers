@@ -39,7 +39,7 @@ class TorquePDController : public controller_interface::MultiInterfaceController
 
   void starting(const ros::Time& time) override;
 
-  //void stopping(const ros::Time& time) override;
+  void stopping(const ros::Time& time) override;
 
   // some helper functions
   //#################################################################################

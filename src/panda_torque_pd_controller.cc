@@ -238,7 +238,21 @@ Eigen::Matrix<double, 7, 1> TorquePDController::SaturateTorqueRate(
 }
 
 //########################################################################################
-
+void TorquePDController::stopping(const ros::Time& /*time*/) 
+{
+  // Reset completion flags
+  traj_completion_published_ = false;
+  
+  // Optional: Reset other state that should be initialized when restarting
+  t_traj_ = 0.0;
+  
+  // Publish a message indicating completion status is reset
+  std_msgs::Bool msg;
+  msg.data = false;
+  traj_completion_pub_.publish(msg);
+  
+  ROS_INFO("TorquePDController: Stopping controller, reset completion status.");
+}
 
 } // namespace franka_torque_controller
 
