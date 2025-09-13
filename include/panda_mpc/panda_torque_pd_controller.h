@@ -204,6 +204,7 @@ class TorquePDController : public controller_interface::MultiInterfaceController
   ros::Publisher traj_completion_pub_;
   double traj_completion_time_ = 0.0;
   bool traj_completion_published_ = false;
+  bool trajectory_finished_ = false;
   double t_delay_ = 0.1; // 100ms delay to ensure trajectory completion
 };
 }

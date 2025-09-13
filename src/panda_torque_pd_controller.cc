@@ -220,6 +220,9 @@ void TorquePDController::update(const ros::Time& time, const ros::Duration& peri
     traj_completion_pub_.publish(msg);
     traj_completion_published_ = true;
     ROS_INFO("Trajectory complete at t=%.3f seconds", t_traj_);
+
+    // Don't shut down publishers, just set a flag
+    trajectory_finished_ = true;
   }
 }
 
@@ -242,14 +245,17 @@ void TorquePDController::stopping(const ros::Time& /*time*/)
 {
   // Reset completion flags
   traj_completion_published_ = false;
+  trajectory_finished_ = false;
   
   // Optional: Reset other state that should be initialized when restarting
   t_traj_ = 0.0;
   
-  // Publish a message indicating completion status is reset
-  std_msgs::Bool msg;
-  msg.data = false;
-  traj_completion_pub_.publish(msg);
+  // Only publish if we need to change the completion status
+  if (traj_completion_pub_.getNumSubscribers() > 0) {
+    std_msgs::Bool msg;
+    msg.data = false;
+    traj_completion_pub_.publish(msg);
+  }
   
   ROS_INFO("TorquePDController: Stopping controller, reset completion status.");
 }
