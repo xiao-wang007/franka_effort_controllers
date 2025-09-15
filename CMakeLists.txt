@@ -67,6 +67,7 @@ catkin_package(
 add_library(panda_torque_controllers
   src/panda_mpc_torque_controller.cc
   src/panda_torque_pd_controller.cc
+  src/panda_torque_pd_controller_simpson.cc
 )
 
 add_dependencies(panda_torque_controllers

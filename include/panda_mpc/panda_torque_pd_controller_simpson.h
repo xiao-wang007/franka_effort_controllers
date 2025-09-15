@@ -20,6 +20,8 @@
 #include <franka_hw/franka_cartesian_command_interface.h>
 #include <franka_hw/franka_model_interface.h>
 #include <franka_hw/trigger_rate.h>
+#include "panda_mpc/hermite_spline.h"
+#include "panda_mpc/quadratic_spline.h"
 
 namespace franka_torque_controller {
  
@@ -27,7 +29,7 @@ namespace franka_torque_controller {
 #define PI 3.14
 using Vec7 = Eigen::Matrix<double,7,1>;
 
-class TorquePDController : public controller_interface::MultiInterfaceController<
+class TorquePDController_Simpson : public controller_interface::MultiInterfaceController<
                                     franka_hw::FrankaModelInterface,
                                     franka_hw::FrankaStateInterface,
                                     hardware_interface::EffortJointInterface> 
@@ -170,47 +172,55 @@ class TorquePDController : public controller_interface::MultiInterfaceController
   realtime_tools::RealtimePublisher<std_msgs::Float64MultiArray> torque_publisher_;
 
   // path for ref trajs
-  // task1 _free_flight
+  // task1
   //std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/experiments/task1_N60_euler_hlow0.07_dtheta2.0/test1_N60_Euler_hlow0.07_h.csv"};
   //std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/experiments/task1_N60_euler_hlow0.07_dtheta2.0/test1_N60_Euler_hlow0.07_q.csv"};
   //std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/experiments/task1_N60_euler_hlow0.07_dtheta2.0/test1_N60_Euler_hlow0.07_v.csv"};
   //std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/experiments/task1_N60_euler_hlow0.07_dtheta2.0/test1_N60_Euler_hlow0.07_u.csv"};
  
-  // task2 _free_flight
+  // task2
   //std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/experiments/task2_N60_euler_hlow0.04_dtheta2.0/test2_N60_Euler_hlow0.04_h.csv"};
   //std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/experiments/task2_N60_euler_hlow0.04_dtheta2.0/test2_N60_Euler_hlow0.04_q.csv"};
   //std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/experiments/task2_N60_euler_hlow0.04_dtheta2.0/test2_N60_Euler_hlow0.04_v.csv"};
   //std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/experiments/task2_N60_euler_hlow0.04_dtheta2.0/test2_N60_Euler_hlow0.04_u.csv"};
  
-  // task3 _1st_ever_impact_real_exp
-  std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_h.csv"};
-  std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_q.csv"};
-  std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_v.csv"};
-  std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_u.csv"};
-  std::string message_to_console_ {"Tracking with Euler's, N = 60, dtheata1.0"};
-
-  // case 1 in paper, N = 60
-//   std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/real_exp/1/traj_N60_hlow0.03_euler_h.csv"};
-//   std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/real_exp/1/traj_N60_hlow0.03_euler_q.csv"};
-//   std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/real_exp/1/traj_N60_hlow0.03_euler_v.csv"};
-//   std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/real_exp/1/traj_N60_hlow0.03_euler_u.csv"};
+  // task3 (case 1 in paper, Euler N = 60)
+//   std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_h.csv"};
+//   std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_q.csv"};
+//   std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_v.csv"};
+//   std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_u.csv"};
 //   std::string message_to_console_ {"Tracking with Euler's, N = 60"};
 
-  // case 3 in paper, N = 20
-//   std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/real_exp/3/traj_N20_hlow0.07_euler_h.csv"};
-//   std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/real_exp/3/traj_N20_hlow0.07_euler_q.csv"};
-//   std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/real_exp/3/traj_N20_hlow0.07_euler_v.csv"};
-//   std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/real_exp/3/traj_N20_hlow0.07_euler_u.csv"};
-//   std::string message_to_console_ {"Tracking with Euler's, N = 20"};
+  // case 2 in paper, Simpson N = 60
+//   std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/real_exp/2/traj_N60_hlow0.03_simpson_h.csv"};
+//   std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/real_exp/2/traj_N60_hlow0.03_simpson_q.csv"};
+//   std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/real_exp/2/traj_N60_hlow0.03_simpson_v.csv"};
+//   std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/real_exp/2/traj_N60_hlow0.03_simpson_u.csv"};
+//   std::string ref_traj_path_a_ {"/home/sc19zx/catkin_ws/real_exp/2/traj_N60_hlow0.03_simpson_a.csv"};
+//   std::string message_to_console_ {"Tracking with Simpson's, N = 60"};
 
-  // initialize the splines for q, v, u to be defined in starting() later
-  LinearSpline<Vec7> q_spline_;
-  LinearSpline<Vec7> v_spline_;
-  LinearSpline<Vec7> u_spline_;
+  // case 4 in paper, Simpson N = 20
+  std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/real_exp/4/traj_N20_hlow0.07_simpson_h.csv"};
+  std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/real_exp/4/traj_N20_hlow0.07_simpson_q.csv"};
+  std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/real_exp/4/traj_N20_hlow0.07_simpson_v.csv"};
+  std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/real_exp/4/traj_N20_hlow0.07_simpson_u.csv"};
+  std::string ref_traj_path_a_ {"/home/sc19zx/catkin_ws/real_exp/4/traj_N20_hlow0.07_simpson_a.csv"};
+  std::string message_to_console_ {"Tracking with Simpson's, N = 20"};
+
+
+  // hermite cubic
+  MultiCubicHermiteSpline q_hermite_spline_;
+  MultiCubicHermiteSpline v_hermite_spline_;
+  MultiQuadraticSpline u_quadratic_spline_;
+  LinearSpline<Vec7> u_linear_spline_;
 
   // starting time 
   double t_traj_;
-  Eigen::VectorXd Kp_;
+  /* for N = 60 */
+//   Eigen::VectorXd Kp_ = Eigen::VectorXd::Constant(NUM_JOINTS, 40.);
+//   Eigen::VectorXd Kd_ = Eigen::VectorXd::Constant(NUM_JOINTS, 40.);
+
+  Eigen::VectorXd Kp_; 
   Eigen::VectorXd Kd_;
   double alpha_ = 0.99;
 
@@ -221,7 +231,7 @@ class TorquePDController : public controller_interface::MultiInterfaceController
   bool traj_completion_published_ = false;
   bool trajectory_finished_ = false;
   double t_delay_ = 0.1; // 100ms delay to ensure trajectory completion
-  int N_ = 60;
+  int N_ = 20; // number of knots
 };
 }
 

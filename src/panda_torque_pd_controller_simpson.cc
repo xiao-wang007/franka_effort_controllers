@@ -1,4 +1,4 @@
-#include <panda_mpc/panda_torque_pd_controller.h>
+#include <panda_mpc/panda_torque_pd_controller_simpson.h>
 
 #include <controller_interface/controller_base.h>
 #include <pluginlib/class_list_macros.h>
@@ -8,7 +8,7 @@
 namespace franka_torque_controller 
 {
 
-bool TorquePDController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& node_handle) 
+bool TorquePDController_Simpson::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& node_handle) 
 {
   // get model interface
   auto* model_interface = robot_hw->get<franka_hw::FrankaModelInterface>();
@@ -74,7 +74,7 @@ bool TorquePDController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHa
 }
 
 //########################################################################################
-void TorquePDController::starting(const ros::Time& time) 
+void TorquePDController_Simpson::starting(const ros::Time& time) 
 {
   franka::RobotState robot_state = state_handle_->getRobotState();
 
@@ -92,11 +92,12 @@ void TorquePDController::starting(const ros::Time& time)
 
   // load the ref trajs
   int nJoint = 7;
+  
   auto loaded_q = load_csv(ref_traj_path_q_, N_, nJoint);
   auto loaded_v = load_csv(ref_traj_path_v_, N_, nJoint);
   auto loaded_u = load_csv(ref_traj_path_u_, N_, nJoint);
   auto loaded_h = load_csv(ref_traj_path_h_, N_-1, 1);
-
+  auto loaded_a = load_csv(ref_traj_path_a_, N_, nJoint);
 
   // compute time knots 
   std::vector<double> ts;
@@ -108,27 +109,12 @@ void TorquePDController::starting(const ros::Time& time)
     ts.push_back(cumsum_h(i));
   }
 
-  // linear spline for q 
-  std::vector<Vec7> qs;
-  for (int i = 0; i < loaded_q.rows(); i++)
-  {
-      Vec7 q = loaded_q.row(i).transpose();
-      qs.push_back(q);
-  }
-  q_spline_.reset(ts, qs);
-  std::cout << "q_spline(0.0): " << q_spline_(0.0).transpose() << std::endl;
-  std::cout << "q_spline(0.12): " << q_spline_(0.12).transpose() << '\n' << std::endl;
+  // Convert std::vector<double> to Eigen::VectorXd
+  Eigen::VectorXd ts_eigen = Eigen::Map<Eigen::VectorXd>(ts.data(), ts.size());
 
-  // linear spline for v 
-  std::vector<Vec7> vs;
-  for (int i = 0; i < loaded_v.rows(); i++)
-  {
-      Vec7 v = loaded_v.row(i).transpose();
-      vs.push_back(v);
-  }
-  v_spline_.reset(ts, vs);
-  std::cout << "v_spline(0.0): " << v_spline_(0.0).transpose() << std::endl;
-  std::cout << "v_spline(0.12): " << v_spline_(0.12).transpose() << '\n' << std::endl;
+  q_hermite_spline_.fit(ts_eigen, loaded_q, loaded_v);
+  v_hermite_spline_.fit(ts_eigen, loaded_v, loaded_a);
+  u_quadratic_spline_.fit(ts_eigen, loaded_u);
 
   // linear spline for u
   std::vector<Vec7> us;
@@ -137,25 +123,32 @@ void TorquePDController::starting(const ros::Time& time)
       Vec7 u = loaded_u.row(i).transpose();
       us.push_back(u);
   }
-  u_spline_.reset(ts, us);
-  std::cout << "u_spline(0.0): " << u_spline_(0.0).transpose() << std::endl;
-  std::cout << "u_spline(0.12): " << u_spline_(0.12).transpose() << '\n' << std::endl;
+  u_linear_spline_.reset(ts, us);
 
-  /* this set is the same as used in N = 20 */
+  std::cout << "q_hermite_spline_ at t = 0.1: \n" << q_hermite_spline_.eval(0.1).transpose() << std::endl;
+  std::cout << "v_hermite_spline_ at t = 0.1: \n" << v_hermite_spline_.eval(0.1).transpose() << std::endl;
+  std::cout << "u_quadratic_spline_ at t = 0.1: \n" << u_quadratic_spline_.eval(0.1).transpose() << std::endl;
+  std::cout << "u_linear_spline_ at t = 0.1: \n" << u_linear_spline_(0.1).transpose() << std::endl;
+
+  /* for N = 20, tried with simpson */
   // Kp_.resize(NUM_JOINTS);
-  // Kp_ << 40., 40., 40., 40., 40., 40., 40.;
+  // Kp_ << 80., 80., 80., 80., 60., 80., 20.;
   // Kd_.resize(NUM_JOINTS);
-  // Kd_ << 30., 30., 30., 30., 10., 10., 5.;
+  // Kd_ << 70., 70., 70., 70., 10., 10., 5.;
 
-  /* These are used for N = 60 Euler only, simpson needs large gains */
-  // // override the kp gain for joint 7 
-  // Kp_(0) = 50.;
-  // //Kp_(6) = 10.;
-  // Kd_(6) = 5.; // lower the kd gain for joint 7 kills the jittering
+  /* for N = 60, tried with simpson */
   Kp_.resize(NUM_JOINTS);
-  Kp_ << 50., 15., 15., 15., 15., 15., 15.;
+  Kp_ << 40., 40., 40., 40., 40., 40., 40.;
   Kd_.resize(NUM_JOINTS);
-  Kd_ << 5., 5., 5., 5., 5., 5., 5.;
+  Kd_ << 30., 30., 30., 30., 10., 10., 5.;
+  // Kp_ << 50., 15., 15., 15., 15., 15., 15.;
+  // Kd_ << 5., 5., 5., 5., 5., 5., 5.;
+
+  //Kp_(0) = 50.;
+  //Kp_(6) = 10.;
+  // Kd_(6) = 5.; // lower the kd gain for joint 7 kills the jittering
+  // Kd_(5) = 10.; // lower the kd gain for joint 6 kills the jittering
+  // Kd_(4) = 10.; // lower the kd gain for joint 5 kills the jittering
   std::cout << "Kp: " << Kp_.transpose() << std::endl;
   std::cout << "Kd: " << Kd_.transpose() << '\n' << std::endl;
 
@@ -169,7 +162,7 @@ void TorquePDController::starting(const ros::Time& time)
   ROS_INFO("Trajectory end time (with delay = 0.1s): %.3f seconds \n", traj_completion_time_);
   traj_completion_published_ = false;
 
-  // signal to console which case is tracking
+  // signal to console which case it is
   std::cout << "\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << std::endl;
   std::cout << "%%%%%%% " << message_to_console_ << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << std::endl;
   std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" << std::endl;
@@ -179,7 +172,7 @@ void TorquePDController::starting(const ros::Time& time)
 }
 
 //########################################################################################
-void TorquePDController::update(const ros::Time& time, const ros::Duration& period) 
+void TorquePDController_Simpson::update(const ros::Time& time, const ros::Duration& period) 
 {
   // get current state
   franka::RobotState robot_state = state_handle_->getRobotState();
@@ -189,9 +182,10 @@ void TorquePDController::update(const ros::Time& time, const ros::Duration& peri
   t_traj_ += period.toSec();
 
   // index to get desired q, v, and tau_ff
-  Eigen::VectorXd q_d = q_spline_(t_traj_);
-  Eigen::VectorXd v_d = v_spline_(t_traj_);
-  Eigen::VectorXd tau_ff = u_spline_(t_traj_);
+  Eigen::VectorXd q_d = q_hermite_spline_.eval(t_traj_);
+  Eigen::VectorXd v_d = v_hermite_spline_.eval(t_traj_);
+  Eigen::VectorXd tau_ff_quadratic = u_quadratic_spline_.eval(t_traj_);
+  Eigen::VectorXd tau_ff_linear = u_linear_spline_(t_traj_);
 
   // filter out joint7 velocity
    for (size_t i = 0; i < 7; i++) {
@@ -205,7 +199,7 @@ void TorquePDController::update(const ros::Time& time, const ros::Duration& peri
     // tau_calculated(i) = tau_ff(i) 
     //                   + Kp_(i) * (q_d(i) - robot_state.q[i]) 
     //                   + Kd_(i) * (v_d(i) - robot_state.dq[i]);
-    tau_calculated(i) = tau_ff(i) 
+    tau_calculated(i) = tau_ff_linear(i) 
                       + Kp_(i) * (q_d(i) - robot_state.q[i]) 
                       + Kd_(i) * (v_d(i) - dq_filtered_[i]);
   }
@@ -242,7 +236,7 @@ void TorquePDController::update(const ros::Time& time, const ros::Duration& peri
 }
 
 //########################################################################################
-Eigen::Matrix<double, 7, 1> TorquePDController::SaturateTorqueRate(
+Eigen::Matrix<double, 7, 1> TorquePDController_Simpson::SaturateTorqueRate(
                             const Eigen::Matrix<double, 7, 1>& tau_d_calculated,
                             const Eigen::Matrix<double, 7, 1>& tau_J_d) 
 {  
@@ -256,7 +250,7 @@ Eigen::Matrix<double, 7, 1> TorquePDController::SaturateTorqueRate(
 }
 
 //########################################################################################
-void TorquePDController::stopping(const ros::Time& /*time*/) 
+void TorquePDController_Simpson::stopping(const ros::Time& /*time*/) 
 {
   // Reset completion flags
   traj_completion_published_ = false;
@@ -277,4 +271,4 @@ void TorquePDController::stopping(const ros::Time& /*time*/)
 
 } // namespace franka_torque_controller
 
-PLUGINLIB_EXPORT_CLASS(franka_torque_controller::TorquePDController, controller_interface::ControllerBase)
+PLUGINLIB_EXPORT_CLASS(franka_torque_controller::TorquePDController_Simpson, controller_interface::ControllerBase)

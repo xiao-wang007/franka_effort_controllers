@@ -22,3 +22,11 @@
     </description>
   </class>
 </library>
+
+<library path="lib/libpanda_torque_controllers">
+  <class name="panda_mpc/TorquePDController_Simpson" type="franka_torque_controller::TorquePDController_Simpson" base_class_type="controller_interface::ControllerBase">
+    <description>
+      A controller that tracks q_ref, v_ref and u_ref. The ref trajs are constructed locally in the controller class with Simpson's integration.
+    </description>
+  </class>
+</library>
