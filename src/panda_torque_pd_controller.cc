@@ -153,9 +153,9 @@ void TorquePDController::starting(const ros::Time& time)
   // //Kp_(6) = 10.;
   // Kd_(6) = 5.; // lower the kd gain for joint 7 kills the jittering
   Kp_.resize(NUM_JOINTS);
-  Kp_ << 50., 15., 15., 15., 15., 15., 15.;
+  Kp_ << 150., 150., 150., 150., 150., 150., 150.;
   Kd_.resize(NUM_JOINTS);
-  Kd_ << 5., 5., 5., 5., 5., 5., 5.;
+  Kd_ << 30., 30., 30., 30., 30., 30., 5.;
   std::cout << "Kp: " << Kp_.transpose() << std::endl;
   std::cout << "Kd: " << Kd_.transpose() << '\n' << std::endl;
 
