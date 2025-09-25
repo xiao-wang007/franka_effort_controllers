@@ -93,11 +93,25 @@ void TorquePDController_Simpson::starting(const ros::Time& time)
   // load the ref trajs
   int nJoint = 7;
   
+  /* for earlier ones */
+  // auto loaded_q = load_csv(ref_traj_path_q_, N_, nJoint);
+  // auto loaded_v = load_csv(ref_traj_path_v_, N_, nJoint);
+  // auto loaded_u = load_csv(ref_traj_path_u_, N_, nJoint);
+  // auto loaded_h = load_csv(ref_traj_path_h_, N_-1, 1);
+  // auto loaded_a = load_csv(ref_traj_path_a_, N_, nJoint);
+
+  /* for later ones from effective mass onwards*/
   auto loaded_q = load_csv(ref_traj_path_q_, N_, nJoint);
   auto loaded_v = load_csv(ref_traj_path_v_, N_, nJoint);
   auto loaded_u = load_csv(ref_traj_path_u_, N_, nJoint);
-  auto loaded_h = load_csv(ref_traj_path_h_, N_-1, 1);
+  auto loaded_h = load_csv(ref_traj_path_h_, N_, 1);
   auto loaded_a = load_csv(ref_traj_path_a_, N_, nJoint);
+
+  std::cout << "loaded_q shape: " << loaded_q.rows() << " x " << loaded_q.cols() << std::endl;
+  std::cout << "loaded_v shape: " << loaded_v.rows() << " x " << loaded_v.cols() << std::endl;
+  std::cout << "loaded_u shape: " << loaded_u.rows() << " x " << loaded_u.cols() << std::endl;
+  std::cout << "loaded_h shape: " << loaded_h.rows() << " x " << loaded_h.cols() << std::endl;
+  std::cout << "loaded_a shape: " << loaded_a.rows() << " x " << loaded_a.cols() << std::endl;
 
   // compute time knots 
   std::vector<double> ts;
@@ -109,12 +123,25 @@ void TorquePDController_Simpson::starting(const ros::Time& time)
     ts.push_back(cumsum_h(i));
   }
 
+  // for (int i = 0; i < loaded_h.rows(); i++)
+  // {
+  //   ts.push_back(loaded_h(i));
+  // }
+
+  std::cout << "\n checking 0 \n" << std::endl;
+
   // Convert std::vector<double> to Eigen::VectorXd
   Eigen::VectorXd ts_eigen = Eigen::Map<Eigen::VectorXd>(ts.data(), ts.size());
 
+  std::cout << "ts_eigen: " << ts_eigen.transpose() << '\n' << std::endl;
+
   q_hermite_spline_.fit(ts_eigen, loaded_q, loaded_v);
+  std::cout << "\n checking 1 \n" << std::endl;
   v_hermite_spline_.fit(ts_eigen, loaded_v, loaded_a);
+  std::cout << "\n checking 2 \n" << std::endl;
   u_quadratic_spline_.fit(ts_eigen, loaded_u);
+  std::cout << "\n checking 3 \n" << std::endl;
+
 
   // linear spline for u
   std::vector<Vec7> us;
@@ -124,6 +151,7 @@ void TorquePDController_Simpson::starting(const ros::Time& time)
       us.push_back(u);
   }
   u_linear_spline_.reset(ts, us);
+
 
   std::cout << "q_hermite_spline_ at t = 0.1: \n" << q_hermite_spline_.eval(0.1).transpose() << std::endl;
   std::cout << "v_hermite_spline_ at t = 0.1: \n" << v_hermite_spline_.eval(0.1).transpose() << std::endl;
@@ -141,6 +169,12 @@ void TorquePDController_Simpson::starting(const ros::Time& time)
   Kp_ << 40., 40., 40., 40., 40., 40., 40.;
   Kd_.resize(NUM_JOINTS);
   Kd_ << 30., 30., 30., 30., 10., 10., 5.;
+
+  /* for case 6, meff large rotation*/
+  // Kp_.resize(NUM_JOINTS);
+  // Kp_ << 60., 120., 60., 100., 60., 60., 60.;
+  // Kd_.resize(NUM_JOINTS);
+  // Kd_ << 40., 80., 40., 80., 20., 20., 10.;
   // Kp_ << 50., 15., 15., 15., 15., 15., 15.;
   // Kd_ << 5., 5., 5., 5., 5., 5., 5.;
 

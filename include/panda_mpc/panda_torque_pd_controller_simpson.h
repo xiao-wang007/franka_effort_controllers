@@ -192,20 +192,48 @@ class TorquePDController_Simpson : public controller_interface::MultiInterfaceCo
 //   std::string message_to_console_ {"Tracking with Euler's, N = 60"};
 
   // case 2 in paper, Simpson N = 60
-//   std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/real_exp/2/traj_N60_hlow0.03_simpson_h.csv"};
-//   std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/real_exp/2/traj_N60_hlow0.03_simpson_q.csv"};
-//   std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/real_exp/2/traj_N60_hlow0.03_simpson_v.csv"};
-//   std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/real_exp/2/traj_N60_hlow0.03_simpson_u.csv"};
-//   std::string ref_traj_path_a_ {"/home/sc19zx/catkin_ws/real_exp/2/traj_N60_hlow0.03_simpson_a.csv"};
-//   std::string message_to_console_ {"Tracking with Simpson's, N = 60"};
+  std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/real_exp/2/traj_N60_hlow0.03_simpson_h.csv"};
+  std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/real_exp/2/traj_N60_hlow0.03_simpson_q.csv"};
+  std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/real_exp/2/traj_N60_hlow0.03_simpson_v.csv"};
+  std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/real_exp/2/traj_N60_hlow0.03_simpson_u.csv"};
+  std::string ref_traj_path_a_ {"/home/sc19zx/catkin_ws/real_exp/2/traj_N60_hlow0.03_simpson_a.csv"};
+  std::string message_to_console_ {"Tracking with Simpson's, N = 60"};
 
   // case 4 in paper, Simpson N = 20
-  std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/real_exp/4/traj_N20_hlow0.07_simpson_h.csv"};
-  std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/real_exp/4/traj_N20_hlow0.07_simpson_q.csv"};
-  std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/real_exp/4/traj_N20_hlow0.07_simpson_v.csv"};
-  std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/real_exp/4/traj_N20_hlow0.07_simpson_u.csv"};
-  std::string ref_traj_path_a_ {"/home/sc19zx/catkin_ws/real_exp/4/traj_N20_hlow0.07_simpson_a.csv"};
-  std::string message_to_console_ {"Tracking with Simpson's, N = 20"};
+//   std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/real_exp/4/traj_N20_hlow0.07_simpson_h.csv"};
+//   std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/real_exp/4/traj_N20_hlow0.07_simpson_q.csv"};
+//   std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/real_exp/4/traj_N20_hlow0.07_simpson_v.csv"};
+//   std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/real_exp/4/traj_N20_hlow0.07_simpson_u.csv"};
+//   std::string ref_traj_path_a_ {"/home/sc19zx/catkin_ws/real_exp/4/traj_N20_hlow0.07_simpson_a.csv"};
+//   std::string message_to_console_ {"Tracking with Simpson's, N = 20"};
+
+  // case 6 meff 1, ds = 0.36
+//   std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/real_exp/6_em_noG_ds0.36_take2/with_maxing_em/N20_hlow0.08_ds0.36_dtheta_-1.0_simpson_h.csv"};
+//   std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/real_exp/6_em_noG_ds0.36_take2/with_maxing_em/N20_hlow0.08_ds0.36_dtheta_-1.0_simpson_q.csv"};
+//   std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/real_exp/6_em_noG_ds0.36_take2/with_maxing_em/N20_hlow0.08_ds0.36_dtheta_-1.0_simpson_v.csv"};
+//   std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/real_exp/6_em_noG_ds0.36_take2/with_maxing_em/N20_hlow0.08_ds0.36_dtheta_-1.0_simpson_u.csv"};
+//   std::string ref_traj_path_a_ {"/home/sc19zx/catkin_ws/real_exp/6_em_noG_ds0.36_take2/with_maxing_em/N20_hlow0.08_ds0.36_dtheta_-1.0_simpson_a.csv"};
+
+//   std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/real_exp/6_em_noG_ds0.36_take2/without_maxing_em/N20_hlow0.08_ds0.36_dtheta_-1.0_simpson_h.csv"};
+//   std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/real_exp/6_em_noG_ds0.36_take2/without_maxing_em/N20_hlow0.08_ds0.36_dtheta_-1.0_simpson_q.csv"};
+//   std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/real_exp/6_em_noG_ds0.36_take2/without_maxing_em/N20_hlow0.08_ds0.36_dtheta_-1.0_simpson_v.csv"};
+//   std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/real_exp/6_em_noG_ds0.36_take2/without_maxing_em/N20_hlow0.08_ds0.36_dtheta_-1.0_simpson_u.csv"};
+//   std::string ref_traj_path_a_ {"/home/sc19zx/catkin_ws/real_exp/6_em_noG_ds0.36_take2/without_maxing_em/N20_hlow0.08_ds0.36_dtheta_-1.0_simpson_a.csv"};
+//   std::string message_to_console_ {"Tracking with Simpson's, N = 20"};
+
+  // case 6 meff 2, dtheta = 2.5
+//   std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/real_exp/6_em_noG_dtheta2.5_take2/with_maxing_em/N20_hlow0.08_ds0.14_dtheta_2.5_simpson_h.csv"};
+//   std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/real_exp/6_em_noG_dtheta2.5_take2/with_maxing_em/N20_hlow0.08_ds0.14_dtheta_2.5_simpson_q.csv"};
+//   std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/real_exp/6_em_noG_dtheta2.5_take2/with_maxing_em/N20_hlow0.08_ds0.14_dtheta_2.5_simpson_v.csv"};
+//   std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/real_exp/6_em_noG_dtheta2.5_take2/with_maxing_em/N20_hlow0.08_ds0.14_dtheta_2.5_simpson_u.csv"};
+//   std::string ref_traj_path_a_ {"/home/sc19zx/catkin_ws/real_exp/6_em_noG_dtheta2.5_take2/with_maxing_em/N20_hlow0.08_ds0.14_dtheta_2.5_simpson_a.csv"};
+
+//   std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/real_exp/6_em_noG_dtheta2.5_take2/without_maxing_em/N20_hlow0.08_ds0.14_dtheta_2.5_simpson_h.csv"};
+//   std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/real_exp/6_em_noG_dtheta2.5_take2/without_maxing_em/N20_hlow0.08_ds0.14_dtheta_2.5_simpson_q.csv"};
+//   std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/real_exp/6_em_noG_dtheta2.5_take2/without_maxing_em/N20_hlow0.08_ds0.14_dtheta_2.5_simpson_v.csv"};
+//   std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/real_exp/6_em_noG_dtheta2.5_take2/without_maxing_em/N20_hlow0.08_ds0.14_dtheta_2.5_simpson_u.csv"};
+//   std::string ref_traj_path_a_ {"/home/sc19zx/catkin_ws/real_exp/6_em_noG_dtheta2.5_take2/without_maxing_em/N20_hlow0.08_ds0.14_dtheta_2.5_simpson_a.csv"};
+//   std::string message_to_console_ {"Tracking with Simpson's, N = 20"};
 
 
   // hermite cubic
@@ -231,7 +259,7 @@ class TorquePDController_Simpson : public controller_interface::MultiInterfaceCo
   bool traj_completion_published_ = false;
   bool trajectory_finished_ = false;
   double t_delay_ = 0.1; // 100ms delay to ensure trajectory completion
-  int N_ = 20; // number of knots
+  int N_ = 60; // number of knots
 };
 }
 
