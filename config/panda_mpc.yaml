@@ -22,6 +22,18 @@ panda_torque_pd_controller:
         - panda_joint6
         - panda_joint7
 
+# panda_torque_pd_controller_simpson:
+#     type: panda_mpc/TorquePDController_Simpson
+#     arm_id: panda
+#     joint_names:
+#         - panda_joint1
+#         - panda_joint2
+#         - panda_joint3
+#         - panda_joint4
+#         - panda_joint5
+#         - panda_joint6
+#         - panda_joint7
+    
 panda_torque_pd_controller_simpson:
     type: panda_mpc/TorquePDController_Simpson
     arm_id: panda
@@ -33,3 +45,16 @@ panda_torque_pd_controller_simpson:
         - panda_joint5
         - panda_joint6
         - panda_joint7
+    # Trajectory file paths
+    ref_traj_path_h: "/path/to/your/h.csv"
+    ref_traj_path_q: "/path/to/your/q.csv"
+    ref_traj_path_v: "/path/to/your/v.csv"
+    ref_traj_path_u: "/path/to/your/u.csv"
+    ref_traj_path_a: "/path/to/your/a.csv"
+    # Controller gains
+    kp_gains: [40.0, 40.0, 40.0, 40.0, 40.0, 40.0, 40.0]
+    kd_gains: [40.0, 40.0, 40.0, 40.0, 40.0, 40.0, 40.0]
+    # Other parameters
+    alpha: 0.99
+    N: 20
+    message_to_console: "Tracking with Simpson's, N = 20"

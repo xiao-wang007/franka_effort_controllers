@@ -43,6 +43,9 @@ class TorquePDController_Simpson : public controller_interface::MultiInterfaceCo
 
   void stopping(const ros::Time& time) override;
 
+  // Parameter loading function
+  bool loadParameters(ros::NodeHandle& node_handle);
+
   // some helper functions
   //#################################################################################
   Eigen::VectorXd cumulative_sum(const Eigen::VectorXd& vec) 
@@ -191,13 +194,13 @@ class TorquePDController_Simpson : public controller_interface::MultiInterfaceCo
 //   std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_u.csv"};
 //   std::string message_to_console_ {"Tracking with Euler's, N = 60"};
 
-  // case 2 in paper, Simpson N = 60
-  std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/real_exp/2/traj_N60_hlow0.03_simpson_h.csv"};
-  std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/real_exp/2/traj_N60_hlow0.03_simpson_q.csv"};
-  std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/real_exp/2/traj_N60_hlow0.03_simpson_v.csv"};
-  std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/real_exp/2/traj_N60_hlow0.03_simpson_u.csv"};
-  std::string ref_traj_path_a_ {"/home/sc19zx/catkin_ws/real_exp/2/traj_N60_hlow0.03_simpson_a.csv"};
-  std::string message_to_console_ {"Tracking with Simpson's, N = 60"};
+  // Trajectory file paths - loaded from YAML parameters
+  std::string ref_traj_path_h_;
+  std::string ref_traj_path_q_;
+  std::string ref_traj_path_v_;
+  std::string ref_traj_path_u_;
+  std::string ref_traj_path_a_;
+  std::string message_to_console_;
 
   // case 4 in paper, Simpson N = 20
 //   std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/real_exp/4/traj_N20_hlow0.07_simpson_h.csv"};
@@ -259,7 +262,7 @@ class TorquePDController_Simpson : public controller_interface::MultiInterfaceCo
   bool traj_completion_published_ = false;
   bool trajectory_finished_ = false;
   double t_delay_ = 0.1; // 100ms delay to ensure trajectory completion
-  int N_ = 60; // number of knots
+  int N_; // number of knots
 };
 }
 
