@@ -263,6 +263,17 @@ class TorquePDController_Simpson : public controller_interface::MultiInterfaceCo
   bool trajectory_finished_ = false;
   double t_delay_ = 0.1; // 100ms delay to ensure trajectory completion
   int N_; // number of knots
+  
+  // new params
+  bool use_t_varying_gains_;
+  double zeta_; // damping ratio
+  double wn_; // natural frequency
+
+  // Maximum joint torque limits
+  const Eigen::Matrix<double, NUM_JOINTS, 1> tau_max =
+      (Eigen::Matrix<double, NUM_JOINTS, 1>() << 87.0, 87.0, 87.0, 87.0, 12.0, 12.0, 12.0).finished();
+  const Eigen::Matrix<double, NUM_JOINTS, 1> tau_min =
+      (Eigen::Matrix<double, NUM_JOINTS, 1>() << -87.0, -87.0, -87.0, -87.0, -12.0, -12.0, -12.0).finished();
 };
 }
 

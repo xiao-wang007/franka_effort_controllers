@@ -45,16 +45,53 @@ panda_torque_pd_controller_simpson:
         - panda_joint5
         - panda_joint6
         - panda_joint7
+
     # Trajectory file paths
-    ref_traj_path_h: "/path/to/your/h.csv"
-    ref_traj_path_q: "/path/to/your/q.csv"
-    ref_traj_path_v: "/path/to/your/v.csv"
-    ref_traj_path_u: "/path/to/your/u.csv"
-    ref_traj_path_a: "/path/to/your/a.csv"
+    # exp8_noG_dtheta0.00_ds0.40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.04_ds0.40_dtheta_0.0_simpson_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.04_ds0.40_dtheta_0.0_simpson_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.04_ds0.40_dtheta_0.0_simpson_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.04_ds0.40_dtheta_0.0_simpson_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.04_ds0.40_dtheta_0.0_simpson_a.csv"
+
+    # exp8_noG_dtheta0.00_ds0.40 without maxing_em
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.04_ds0.40_dtheta_0.0_simpson_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.04_ds0.40_dtheta_0.0_simpson_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.04_ds0.40_dtheta_0.0_simpson_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.04_ds0.40_dtheta_0.0_simpson_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.04_ds0.40_dtheta_0.0_simpson_a.csv"
+
+    # exp9, with maxing_em
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/9_em_noG_dtheta0.00_ds0.14/with_maxing_em/N40_hlow0.04_ds0.14_dtheta_0.0_simpson_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/9_em_noG_dtheta0.00_ds0.14/with_maxing_em/N40_hlow0.04_ds0.14_dtheta_0.0_simpson_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/9_em_noG_dtheta0.00_ds0.14/with_maxing_em/N40_hlow0.04_ds0.14_dtheta_0.0_simpson_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/9_em_noG_dtheta0.00_ds0.14/with_maxing_em/N40_hlow0.04_ds0.14_dtheta_0.0_simpson_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/9_em_noG_dtheta0.00_ds0.14/with_maxing_em/N40_hlow0.04_ds0.14_dtheta_0.0_simpson_a.csv"
+
+    # exp8, N60
+    ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_N60_dtheta0.00_ds0.40/with_maxing_em/N60_hlow0.04_ds0.40_dtheta_0.0_simpson_h.csv"
+    ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_N60_dtheta0.00_ds0.40/with_maxing_em/N60_hlow0.04_ds0.40_dtheta_0.0_simpson_q.csv"
+    ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_N60_dtheta0.00_ds0.40/with_maxing_em/N60_hlow0.04_ds0.40_dtheta_0.0_simpson_v.csv"
+    ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_N60_dtheta0.00_ds0.40/with_maxing_em/N60_hlow0.04_ds0.40_dtheta_0.0_simpson_u.csv"
+    ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_N60_dtheta0.00_ds0.40/with_maxing_em/N60_hlow0.04_ds0.40_dtheta_0.0_simpson_a.csv"
+
     # Controller gains
-    kp_gains: [40.0, 40.0, 40.0, 40.0, 40.0, 40.0, 40.0]
-    kd_gains: [40.0, 40.0, 40.0, 40.0, 40.0, 40.0, 40.0]
+    kp_gains: [200.0, 375.0, 300.0, 300.0, 50.0, 25.0, 10.0]
+    kd_gains: [50.0, 70.0, 50.0, 50.0, 10.0, 10.0,  5.0]
     # Other parameters
     alpha: 0.99
-    N: 20
-    message_to_console: "Tracking with Simpson's, N = 20"
+    N: 60
+    message_to_console: "Tracking with Simpson's, N = 60"
+    use_t_varying_gains: false
+    zeta: 1.0 # damping ratio
+    # natural_frequency: 7.0 #// 1 Hz bandwidth, not reaching down enough
+    # natural_frequency: 13.0 #// 2 Hz bandwidth, power-limit reflex triggered at the beginning
+    # natural_frequency: 10.0 # better, but not reaching down enough
+    # natural_frequency: 11.0 # better, but not reaching down enough
+    # natural_frequency: 12.0 # triggered power-limit reflex at the beginning
+    # natural_frequency: 11.5 # not triggering, seems improving?
+    # natural_frequency: 11.8 # triggered power-limit reflex at the beginning, not triggering when clamped torque
+    # natural_frequency: 13.0 # triggered as well
+    # natural_frequency: 12.5 # triggered as well
+    natural_frequency: 11.5 # 
+
