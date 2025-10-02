@@ -69,20 +69,55 @@ panda_torque_pd_controller_simpson:
     # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/9_em_noG_dtheta0.00_ds0.14/with_maxing_em/N40_hlow0.04_ds0.14_dtheta_0.0_simpson_a.csv"
 
     # exp8, N60
-    ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_N60_dtheta0.00_ds0.40/with_maxing_em/N60_hlow0.04_ds0.40_dtheta_0.0_simpson_h.csv"
-    ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_N60_dtheta0.00_ds0.40/with_maxing_em/N60_hlow0.04_ds0.40_dtheta_0.0_simpson_q.csv"
-    ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_N60_dtheta0.00_ds0.40/with_maxing_em/N60_hlow0.04_ds0.40_dtheta_0.0_simpson_v.csv"
-    ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_N60_dtheta0.00_ds0.40/with_maxing_em/N60_hlow0.04_ds0.40_dtheta_0.0_simpson_u.csv"
-    ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_N60_dtheta0.00_ds0.40/with_maxing_em/N60_hlow0.04_ds0.40_dtheta_0.0_simpson_a.csv"
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_N60_dtheta0.00_ds0.40/with_maxing_em/N60_hlow0.04_ds0.40_dtheta_0.0_simpson_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_N60_dtheta0.00_ds0.40/with_maxing_em/N60_hlow0.04_ds0.40_dtheta_0.0_simpson_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_N60_dtheta0.00_ds0.40/with_maxing_em/N60_hlow0.04_ds0.40_dtheta_0.0_simpson_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_N60_dtheta0.00_ds0.40/with_maxing_em/N60_hlow0.04_ds0.40_dtheta_0.0_simpson_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_N60_dtheta0.00_ds0.40/with_maxing_em/N60_hlow0.04_ds0.40_dtheta_0.0_simpson_a.csv"
+
+    # exp10, with maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_a.csv"
+
+    # exp10, without maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_a.csv"
+
+    # exp11 (no good, ee bumped into top of the can), with maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_a.csv"
+
+    # exp11, without maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/without_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/without_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/without_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/without_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/without_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_a.csv"
+
+    # exp11.5, with maxing em, N40
+    ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/30.0deg/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_h.csv"
+    ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/30.0deg/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_q.csv"
+    ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/30.0deg/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_v.csv"
+    ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/30.0deg/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_u.csv"
+    ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/30.0deg/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_a.csv"
 
     # Controller gains
-    kp_gains: [200.0, 375.0, 300.0, 300.0, 50.0, 25.0, 10.0]
+    kp_gains: [225.0, 350.0, 250.0, 350.0, 50.0, 25.0, 10.0]
     kd_gains: [50.0, 70.0, 50.0, 50.0, 10.0, 10.0,  5.0]
     # Other parameters
     alpha: 0.99
-    N: 60
-    message_to_console: "Tracking with Simpson's, N = 60"
-    use_t_varying_gains: false
+    N: 40
+    message_to_console: "Tracking with Simpson's, N = 40"
+    use_t_varying_gains: true
     zeta: 1.0 # damping ratio
     # natural_frequency: 7.0 #// 1 Hz bandwidth, not reaching down enough
     # natural_frequency: 13.0 #// 2 Hz bandwidth, power-limit reflex triggered at the beginning
@@ -93,5 +128,29 @@ panda_torque_pd_controller_simpson:
     # natural_frequency: 11.8 # triggered power-limit reflex at the beginning, not triggering when clamped torque
     # natural_frequency: 13.0 # triggered as well
     # natural_frequency: 12.5 # triggered as well
-    natural_frequency: 11.5 # 
+    # natural_frequency: 28. #  This is funny! 28. is too aggressive at the end, it wiggles when trying to stabilize at q_f
+    # natural_frequency: 26.0  # This is very good!
+    # natural_frequency: 27.0  # a bit jittery, but still not bad
+    # natural_frequency: 26.5 # damn, cartesian velocity-limit trigger!
+    # natural_frequency: 26.2 # reflex! ["joint_velocity_violation"]
+    # natural_frequency: 25. # pretty good and smooth!
+    # natural_frequency: 20. # noticeably gentler than 25. can slides farther
+    # natural_frequency: 18. # tracking becomes sloppy!
+    # natural_frequency: 19. # better than 18.
+    # natural_frequency: 19.5 # similar to 19.
+    # natural_frequency: 21. # hitting too hard, can topples
 
+    # for exp10
+    # natural_frequency: 19.8 # This one for exp10, Damn, ee missed the target for the case without maxing_em and it looks much gentler
+
+    # for exp11
+    # natural_frequency: 18. # now it starts to work but the white bit touch the can pre-impact. on a second try, no engagement.
+    # natural_frequency: 18.5 # no engagement preimpact, but missed the contact 
+    # natural_frequency: 19. # no engagement preimpact, but missed the contact as well 
+    # natural_frequency: 18.1 # ditto
+    # natural_frequency: 17.9 # ditto
+    # natural_frequency: 20.0 # ditto
+    # natural_frequency: 22.0 # seems starting to engage
+    # natural_frequency: 23.0 # yay, more engagement!
+    natural_frequency: 24.0 # currently settled to
+    # natural_frequency: 25.0 # good 

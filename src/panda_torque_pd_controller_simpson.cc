@@ -313,6 +313,8 @@ void TorquePDController_Simpson::starting(const ros::Time& time)
   std::cout << "Kp: " << Kp_.transpose() << std::endl;
   std::cout << "Kd: " << Kd_.transpose() << '\n' << std::endl;
 
+  std::cout << "q_now: " << q_now_.transpose() << '\n' << std::endl;
+
   if (use_t_varying_gains_) 
   {
     std::cout << "Damping ratio zeta: " << zeta_ << std::endl;
