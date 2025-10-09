@@ -164,7 +164,6 @@ class TorquePDController_Simpson : public controller_interface::MultiInterfaceCo
       "panda_joint4", "panda_joint5", "panda_joint6", "panda_joint7"
   } ;
 
-  franka_hw::TriggerRate trigger_rate_ {0.1}; // 10 Hz
   static constexpr double kMaxTorqueRate = 0.1; 
   const double delta_tau_max_ {1.0}; 
   std::array<double, 7> last_tau_d_ {};
@@ -172,7 +171,6 @@ class TorquePDController_Simpson : public controller_interface::MultiInterfaceCo
 
   // sub and pub 
   ros::Subscriber u_cmd_subscriber_;
-  realtime_tools::RealtimePublisher<std_msgs::Float64MultiArray> torque_publisher_;
 
   // path for ref trajs
   // task1

@@ -76,11 +76,11 @@ panda_torque_pd_controller_simpson:
     # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_N60_dtheta0.00_ds0.40/with_maxing_em/N60_hlow0.04_ds0.40_dtheta_0.0_simpson_a.csv"
 
     # exp10, with maxing em, N40
-    ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_h.csv"
-    ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_q.csv"
-    ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_v.csv"
-    ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_u.csv"
-    ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_a.csv"
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_a.csv"
 
     # exp10, without maxing em, N40
     # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_h.csv"
@@ -88,6 +88,20 @@ panda_torque_pd_controller_simpson:
     # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_v.csv"
     # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_u.csv"
     # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_a.csv"
+
+    #exp10.5, with maxing em, N40, lowered the hit so it will not topple the can
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_a.csv"
+
+    #exp10.5, without maxing em, N40, lowered the hit so it will not topple the can
+    ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_h.csv"
+    ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_q.csv"
+    ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_v.csv"
+    ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_u.csv"
+    ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_a.csv"
 
     # exp11 (good now with current tuning), with maxing em, N40
     # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_h.csv"
@@ -150,9 +164,12 @@ panda_torque_pd_controller_simpson:
     # natural_frequency: 19.5 # similar to 19.
     # natural_frequency: 21. # hitting too hard, can topples
 
-    # for exp10, with maxing_em
-    natural_frequency: 19.8 # This one for exp10, Damn, ee missed the target for the case without maxing_em and it looks much gentler
-    # natural_frequency: 16.0 # barely touching the can
+    # for exp10 and exp10.5, with maxing_em
+    # natural_frequency: 19.8 # This one for exp10, Damn, ee missed the target for the case without maxing_em and it looks much gentler
+    # natural_frequency: 16.0 # not touching the can
+    # natural_frequency: 21.0 # 
+    # natural_frequency: 23.0 # this is the best and hits more accurately
+    natural_frequency: 24.0 
 
     # for exp11 and exp11.5, with maxing_em
     # natural_frequency: 18. # now it starts to work but the white bit touch the can pre-impact. on a second try, no engagement.
