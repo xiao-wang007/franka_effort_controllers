@@ -313,10 +313,6 @@ void TorquePDController_Simpson::starting(const ros::Time& time)
   std::cout << "%%%%%%% " << message_to_console_ << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << std::endl;
   std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" << std::endl;
 
-  std::cout << '\n' << "Controller gains: " << std::endl;
-  std::cout << "Kp: " << Kp_.transpose() << std::endl;
-  std::cout << "Kd: " << Kd_.transpose() << '\n' << std::endl;
-
   std::cout << "q_now: " << q_now_.transpose() << '\n' << std::endl;
 
   if (use_t_varying_gains_) 
@@ -324,6 +320,11 @@ void TorquePDController_Simpson::starting(const ros::Time& time)
     std::cout << "Damping ratio zeta: " << zeta_ << std::endl;
     std::cout << "Natural frequency wn: " << wn_ << "\n" << std::endl;  
   } 
+  else{
+    std::cout << '\n' << "Controller gains: " << std::endl;
+    std::cout << "Kp: " << Kp_.transpose() << std::endl;
+    std::cout << "Kd: " << Kd_.transpose() << '\n' << std::endl;
+  }
 
   // set controller start time
   t_traj_ = 0.0; 

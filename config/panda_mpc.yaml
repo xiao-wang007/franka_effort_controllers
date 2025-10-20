@@ -97,11 +97,11 @@ panda_torque_pd_controller_simpson:
     # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_a.csv"
 
     #exp10.5, without maxing em, N40, lowered the hit so it will not topple the can
-    ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_h.csv"
-    ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_q.csv"
-    ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_v.csv"
-    ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_u.csv"
-    ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_a.csv"
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_a.csv"
 
     # exp11 (good now with current tuning), with maxing em, N40
     # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_h.csv"
@@ -118,11 +118,11 @@ panda_torque_pd_controller_simpson:
     # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/without_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_a.csv"
 
     # exp11.5, with maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/30.0deg/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/30.0deg/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/30.0deg/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/30.0deg/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/30.0deg/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_a.csv"
+    ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/30.0deg/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_h.csv"
+    ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/30.0deg/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_q.csv"
+    ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/30.0deg/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_v.csv"
+    ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/30.0deg/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_u.csv"
+    ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/30.0deg/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_a.csv"
 
     # exp11.5, without maxing em, N40
     # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/without_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_h.csv"
