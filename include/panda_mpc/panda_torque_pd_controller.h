@@ -40,6 +40,9 @@ class TorquePDController : public controller_interface::MultiInterfaceController
   void starting(const ros::Time& time) override;
 
   void stopping(const ros::Time& time) override;
+  
+  // Parameter loading function
+  bool loadParameters(ros::NodeHandle& node_handle);
 
   // some helper functions
   //#################################################################################
@@ -222,6 +225,17 @@ class TorquePDController : public controller_interface::MultiInterfaceController
   bool trajectory_finished_ = false;
   double t_delay_ = 0.1; // 100ms delay to ensure trajectory completion
   int N_ = 60;
+
+  // new params
+  bool use_t_varying_gains_;
+  double zeta_; // damping ratio
+  double wn_; // natural frequency
+
+  // Maximum joint torque limits
+  const Eigen::Matrix<double, NUM_JOINTS, 1> tau_max =
+      (Eigen::Matrix<double, NUM_JOINTS, 1>() << 87.0, 87.0, 87.0, 87.0, 12.0, 12.0, 12.0).finished();
+  const Eigen::Matrix<double, NUM_JOINTS, 1> tau_min =
+      (Eigen::Matrix<double, NUM_JOINTS, 1>() << -87.0, -87.0, -87.0, -87.0, -12.0, -12.0, -12.0).finished();
 };
 }
 

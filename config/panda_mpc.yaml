@@ -21,6 +21,18 @@ panda_torque_pd_controller:
         - panda_joint5
         - panda_joint6
         - panda_joint7
+    ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/1/traj_N60_hlow0.03_euler_h.csv"
+    ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/1/traj_N60_hlow0.03_euler_q.csv"
+    ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/1/traj_N60_hlow0.03_euler_v.csv"
+    ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/1/traj_N60_hlow0.03_euler_u.csv"
+    kp_gains: [150., 150., 150., 150., 150., 150., 150.]
+    kd_gains: [30., 30., 30., 30., 30., 30., 5.]
+    alpha: 0.99
+    N: 40
+    message_to_console: "Tracking with Simpson's, N = 40"
+    use_t_varying_gains: false
+    zeta: 1.0 # damping ratio
+    natural_frequency: 24.0 
 
 # panda_torque_pd_controller_simpson:
 #     type: panda_mpc/TorquePDController_Simpson
