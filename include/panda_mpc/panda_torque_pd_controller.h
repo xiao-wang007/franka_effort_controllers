@@ -40,7 +40,7 @@ class TorquePDController : public controller_interface::MultiInterfaceController
   void starting(const ros::Time& time) override;
 
   void stopping(const ros::Time& time) override;
-  
+
   // Parameter loading function
   bool loadParameters(ros::NodeHandle& node_handle);
 
@@ -185,19 +185,19 @@ class TorquePDController : public controller_interface::MultiInterfaceController
   //std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/experiments/task2_N60_euler_hlow0.04_dtheta2.0/test2_N60_Euler_hlow0.04_v.csv"};
   //std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/experiments/task2_N60_euler_hlow0.04_dtheta2.0/test2_N60_Euler_hlow0.04_u.csv"};
  
-  // task3 _1st_ever_impact_real_exp
-//   std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_h.csv"};
-//   std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_q.csv"};
-//   std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_v.csv"};
-//   std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_u.csv"};
-//   std::string message_to_console_ {"Tracking with Euler's, N = 60, dtheata1.0"};
+  task3 _1st_ever_impact_real_exp
+  std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_h.csv"};
+  std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_q.csv"};
+  std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_v.csv"};
+  std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_u.csv"};
+  std::string message_to_console_ {"Tracking with Euler's, N = 60, dtheata1.0"};
 
   // case 1 in paper, N = 60
-  std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/real_exp/1/traj_N60_hlow0.03_euler_h.csv"};
-  std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/real_exp/1/traj_N60_hlow0.03_euler_q.csv"};
-  std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/real_exp/1/traj_N60_hlow0.03_euler_v.csv"};
-  std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/real_exp/1/traj_N60_hlow0.03_euler_u.csv"};
-  std::string message_to_console_ {"Tracking with Euler's, N = 60"};
+//   std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/real_exp/1/traj_N60_hlow0.03_euler_h.csv"};
+//   std::string ref_traj_path_q_ {"/home/sc19zx/catkin_ws/real_exp/1/traj_N60_hlow0.03_euler_q.csv"};
+//   std::string ref_traj_path_v_ {"/home/sc19zx/catkin_ws/real_exp/1/traj_N60_hlow0.03_euler_v.csv"};
+//   std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/real_exp/1/traj_N60_hlow0.03_euler_u.csv"};
+//   std::string message_to_console_ {"Tracking with Euler's, N = 60"};
 
   // case 3 in paper, N = 20
 //   std::string ref_traj_path_h_ {"/home/sc19zx/catkin_ws/real_exp/3/traj_N20_hlow0.07_euler_h.csv"};
