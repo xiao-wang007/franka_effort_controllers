@@ -186,6 +186,10 @@ bool TorquePDController_Simpson::loadParameters(ros::NodeHandle& node_handle)
 //########################################################################################
 void TorquePDController_Simpson::starting(const ros::Time& time) 
 {
+  // Reset completion flags
+  traj_completion_published_ = false;
+  trajectory_finished_ = false;
+
   franka::RobotState robot_state = state_handle_->getRobotState();
 
   // map to eigen for printing
@@ -393,11 +397,13 @@ void TorquePDController_Simpson::update(const ros::Time& time, const ros::Durati
   // Publish the torque command if the trigger rate allows it
   if (trigger_rate_() && torque_publisher_.trylock())
   {
+    torque_publisher_.msg_.data.clear(); // clear before push back
     for (size_t i = 0; i < NUM_JOINTS; ++i) 
     {
       torque_publisher_.msg_.data.push_back(tau_cmd[i]);
     }
-  } /* forgot why I did this! Damn. */
+    torque_publisher_.unlockAndPublish();
+  } /* forgot why I did this! Damn. Probably I want to manually compare the torques */
 
   // Check if trajectory is complete based on time
   if (!traj_completion_published_ && t_traj_ >= traj_completion_time_) 
@@ -407,9 +413,6 @@ void TorquePDController_Simpson::update(const ros::Time& time, const ros::Durati
     traj_completion_pub_.publish(msg);
     traj_completion_published_ = true;
     ROS_INFO("Trajectory complete at t=%.3f seconds", t_traj_);
-
-    // Don't shut down publishers, just set a flag
-    trajectory_finished_ = true;
   }
 }
 
@@ -430,19 +433,7 @@ Eigen::Matrix<double, 7, 1> TorquePDController_Simpson::SaturateTorqueRate(
 //########################################################################################
 void TorquePDController_Simpson::stopping(const ros::Time& /*time*/) 
 {
-  // Reset completion flags
-  traj_completion_published_ = false;
-  trajectory_finished_ = false;
   
-  // Optional: Reset other state that should be initialized when restarting
-  t_traj_ = 0.0;
-  
-  // Only publish if we need to change the completion status
-  // if (traj_completion_pub_.getNumSubscribers() > 0) {
-  //   std_msgs::Bool msg;
-  //   msg.data = false;
-  //   traj_completion_pub_.publish(msg);
-  // }
     std_msgs::Bool msg;
     msg.data = false;
     traj_completion_pub_.publish(msg);

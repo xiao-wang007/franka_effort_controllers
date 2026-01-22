@@ -1,0 +1,19 @@
+<!-- This file is to be used on the workstation connected directly to the robot -->
+
+<launch>
+	<include file="$(find franka_control)/launch/franka_control.launch">
+		<arg name="robot_ip" value="panda-control"/>
+		<arg name="load_gripper" value="false"/>
+		<arg name="load_pump" value="true"/>
+	</include>
+
+	<node name="controller_spawner" pkg="controller_manager" type="spawner" args="position_joint_trajectory_controller" respawn="false" output="screen"/>
+	<param name="franka_ip" value="panda-control"/>
+
+	<!-- Load controller parameters NOTE the name of the package is not the same as my git repo name -->
+	<rosparam file="$(find panda_torque_controllers)/config/panda_mpc.yaml" command="load"/>
+
+	<!-- Load controller (but don't start - use spawner with stopped flag) -->
+	<node name="torque_controller_loader" pkg="controller_manager" type="spawner" 
+		args="--stopped panda_torque_pd_controller_simpson" respawn="false" output="screen"/>
+</launch>
