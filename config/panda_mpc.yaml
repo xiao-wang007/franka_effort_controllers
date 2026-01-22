@@ -175,11 +175,11 @@ panda_torque_pd_controller_simpson:
     # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/case2_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/without_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_a.csv"
 
     # extra case 3 with maxing em, N40
-    ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_h.csv"
-    ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_q.csv"
-    ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_v.csv"
-    ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_u.csv"
-    ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_a.csv"
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_a.csv"
 
     # extra case 3 without maxing em, N40
     # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/without_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_h.csv"
@@ -188,6 +188,12 @@ panda_torque_pd_controller_simpson:
     # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/without_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_u.csv"
     # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/without_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_a.csv"
     
+    # extra case 6 with maxing em ONLY, N40
+    ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/case6_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_h.csv"
+    ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/case6_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_q.csv"
+    ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/case6_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_v.csv"
+    ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/case6_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_u.csv"
+    ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/case6_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_a.csv"
 
     # Controller gains
     kp_gains: [225.0, 350.0, 250.0, 350.0, 50.0, 25.0, 10.0]
