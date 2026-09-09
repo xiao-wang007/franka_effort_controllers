@@ -1,5 +1,7 @@
 #include <panda_mpc/panda_torque_pd_controller_simpson.h>
 
+#include <algorithm>
+
 #include <controller_interface/controller_base.h>
 #include <pluginlib/class_list_macros.h>
 #include <ros/ros.h>
@@ -69,6 +71,12 @@ bool TorquePDController_Simpson::init(hardware_interface::RobotHW* robot_hw, ros
   // publish torque for debugging and analysis
   torque_publisher_.init(node_handle, "/torque_comparison", 1); //queue size 1
 
+  // subscribe to the solved trajectory, published as a
+  // trajectory_msgs/JointTrajectory (see tools/send_trajectory.py in drakecpp)
+  trajectory_subscriber_ = node_handle.subscribe(
+      "/reference_trajectory", 1,
+      &TorquePDController_Simpson::trajectoryCallback, this);
+
   // init starting time publisher
   start_time_publisher_ = node_handle.advertise<std_msgs::Float64>("/controller_t_start",
                                                               1, true); // queue size 1, latched
@@ -82,40 +90,6 @@ bool TorquePDController_Simpson::init(hardware_interface::RobotHW* robot_hw, ros
 //########################################################################################
 bool TorquePDController_Simpson::loadParameters(ros::NodeHandle& node_handle) 
 {
-  bool params_loaded = true;
-  
-  // Load trajectory file paths - all are required
-  if (!node_handle.getParam("ref_traj_path_h", ref_traj_path_h_)) {
-    ROS_ERROR("TorquePDController_Simpson: Required parameter 'ref_traj_path_h' not found!");
-    params_loaded = false;
-  }
-  
-  if (!node_handle.getParam("ref_traj_path_q", ref_traj_path_q_)) {
-    ROS_ERROR("TorquePDController_Simpson: Required parameter 'ref_traj_path_q' not found!");
-    params_loaded = false;
-  }
-  
-  if (!node_handle.getParam("ref_traj_path_v", ref_traj_path_v_)) {
-    ROS_ERROR("TorquePDController_Simpson: Required parameter 'ref_traj_path_v' not found!");
-    params_loaded = false;
-  }
-  
-  if (!node_handle.getParam("ref_traj_path_u", ref_traj_path_u_)) {
-    ROS_ERROR("TorquePDController_Simpson: Required parameter 'ref_traj_path_u' not found!");
-    params_loaded = false;
-  }
-  
-  if (!node_handle.getParam("ref_traj_path_a", ref_traj_path_a_)) {
-    ROS_ERROR("TorquePDController_Simpson: Required parameter 'ref_traj_path_a' not found!");
-    params_loaded = false;
-  }
-  
-  // Return early if required trajectory parameters are missing
-  if (!params_loaded) {
-    ROS_ERROR("TorquePDController_Simpson: Controller initialization failed due to missing required trajectory parameters!");
-    return false;
-  }
-  
   // Load controller gains
   std::vector<double> kp_gains_vec, kd_gains_vec;
   if (node_handle.getParam("kp_gains", kp_gains_vec) && kp_gains_vec.size() == NUM_JOINTS) {
@@ -166,11 +140,6 @@ bool TorquePDController_Simpson::loadParameters(ros::NodeHandle& node_handle)
   
   // Log loaded parameters
   ROS_INFO_STREAM("TorquePDController_Simpson: Loaded parameters:\n"
-                  << "ref_traj_path_h: " << ref_traj_path_h_ << "\n"
-                  << "ref_traj_path_q: " << ref_traj_path_q_ << "\n" 
-                  << "ref_traj_path_v: " << ref_traj_path_v_ << "\n"
-                  << "ref_traj_path_u: " << ref_traj_path_u_ << "\n"
-                  << "ref_traj_path_a: " << ref_traj_path_a_ << "\n"
                   << "Kp gains: " << Kp_.transpose() << "\n"
                   << "Kd gains: " << Kd_.transpose() << "\n"
                   << "alpha: " << alpha_ << "\n"
@@ -181,6 +150,72 @@ bool TorquePDController_Simpson::loadParameters(ros::NodeHandle& node_handle)
                   << "natural_frequency: " << wn_ << "\n");
 
   return true;
+}
+
+//########################################################################################
+void TorquePDController_Simpson::trajectoryCallback(
+    const trajectory_msgs::JointTrajectory::ConstPtr& msg)
+{
+  const int n = static_cast<int>(msg->points.size());
+  if (n < 2) {
+    ROS_WARN("TorquePDController_Simpson: received trajectory with < 2 points, ignoring");
+    return;
+  }
+
+  // Map the incoming joint order onto joint_names_'s order, in case a
+  // producer sends them in a different order.
+  std::array<int, NUM_JOINTS> col{};
+  for (int i = 0; i < NUM_JOINTS; ++i) {
+    const auto it = std::find(msg->joint_names.begin(), msg->joint_names.end(), joint_names_[i]);
+    if (it == msg->joint_names.end()) {
+      ROS_ERROR_STREAM("TorquePDController_Simpson: trajectory is missing joint "
+                       << joint_names_[i] << ", ignoring");
+      return;
+    }
+    col[i] = static_cast<int>(std::distance(msg->joint_names.begin(), it));
+  }
+
+  Eigen::VectorXd ts(n);
+  Eigen::MatrixXd q(n, NUM_JOINTS), v(n, NUM_JOINTS), u(n, NUM_JOINTS);
+  for (int i = 0; i < n; ++i) {
+    const auto& pt = msg->points[i];
+    ts(i) = pt.time_from_start.toSec();
+    for (int j = 0; j < NUM_JOINTS; ++j) {
+      q(i, j) = pt.positions.at(col[j]);
+      v(i, j) = pt.velocities.at(col[j]);
+      u(i, j) = pt.effort.empty() ? 0.0 : pt.effort.at(col[j]);
+    }
+  }
+  for (int i = 1; i < n; ++i) {
+    if (!(ts(i) > ts(i - 1))) {
+      ROS_ERROR("TorquePDController_Simpson: trajectory times_from_start are not "
+                "strictly increasing, ignoring");
+      return;
+    }
+  }
+
+  // Acceleration at each knot, needed to fit v's Hermite spline: central
+  // differences of velocity, one-sided at the endpoints.
+  Eigen::MatrixXd a(n, NUM_JOINTS);
+  a.row(0) = (v.row(1) - v.row(0)) / (ts(1) - ts(0));
+  a.row(n - 1) = (v.row(n - 1) - v.row(n - 2)) / (ts(n - 1) - ts(n - 2));
+  for (int i = 1; i < n - 1; ++i) {
+    a.row(i) = (v.row(i + 1) - v.row(i - 1)) / (ts(i + 1) - ts(i - 1));
+  }
+
+  auto data = std::make_shared<TrajectoryData>();
+  data->q_spline.fit(ts, q, v);
+  data->v_spline.fit(ts, v, a);
+  std::vector<double> ts_vec(ts.data(), ts.data() + ts.size());
+  std::vector<Vec7> us;
+  us.reserve(n);
+  for (int i = 0; i < n; ++i) us.push_back(u.row(i).transpose());
+  data->u_spline.reset(ts_vec, us);
+  data->duration = ts(n - 1);
+
+  trajectory_buffer_.writeFromNonRT(data);
+  ROS_INFO_STREAM("TorquePDController_Simpson: received new trajectory, "
+                  << n << " points, duration " << data->duration << " s");
 }
 
 //########################################################################################
@@ -204,73 +239,17 @@ void TorquePDController_Simpson::starting(const ros::Time& time)
         << "u_now: " << u_now_.transpose() << "\n");
   ROS_INFO("TorquePDController: Starting controller.");
 
-  // load the ref trajs
-  int nJoint = 7;
-  
-  /* for earlier ones */
-  // auto loaded_q = load_csv(ref_traj_path_q_, N_, nJoint);
-  // auto loaded_v = load_csv(ref_traj_path_v_, N_, nJoint);
-  // auto loaded_u = load_csv(ref_traj_path_u_, N_, nJoint);
-  // auto loaded_h = load_csv(ref_traj_path_h_, N_-1, 1);
-  // auto loaded_a = load_csv(ref_traj_path_a_, N_, nJoint);
 
-  /* for later ones from effective mass onwards*/
-  auto loaded_q = load_csv(ref_traj_path_q_, N_, nJoint);
-  auto loaded_v = load_csv(ref_traj_path_v_, N_, nJoint);
-  auto loaded_u = load_csv(ref_traj_path_u_, N_, nJoint);
-  auto loaded_h = load_csv(ref_traj_path_h_, N_, 1);
-  auto loaded_a = load_csv(ref_traj_path_a_, N_, nJoint);
-
-  std::cout << "loaded_q shape: " << loaded_q.rows() << " x " << loaded_q.cols() << std::endl;
-  std::cout << "loaded_v shape: " << loaded_v.rows() << " x " << loaded_v.cols() << std::endl;
-  std::cout << "loaded_u shape: " << loaded_u.rows() << " x " << loaded_u.cols() << std::endl;
-  std::cout << "loaded_h shape: " << loaded_h.rows() << " x " << loaded_h.cols() << std::endl;
-  std::cout << "loaded_a shape: " << loaded_a.rows() << " x " << loaded_a.cols() << std::endl;
-
-  // compute time knots 
-  std::vector<double> ts;
-  // auto cumsum_h = cumulative_sum(loaded_h);
-  // std::cout << "cumsum_h: " << cumsum_h.transpose() << '\n' << std::endl;
-  // ts.push_back(0.0); // start from 0 second
-  // for (int i = 0; i < cumsum_h.rows(); i++)
-  // {
-  //   ts.push_back(cumsum_h(i));
-  // }
-
-  for (int i = 0; i < loaded_h.rows(); i++)
-  {
-    ts.push_back(loaded_h(i));
+  // pick up whatever trajectory has been received so far on /reference_trajectory
+  active_trajectory_ = *trajectory_buffer_.readFromRT();
+  if (!active_trajectory_) {
+    ROS_ERROR("TorquePDController_Simpson: starting with no trajectory received yet; "
+              "publish one on /reference_trajectory before (or after) starting this "
+              "controller -- update() will hold zero torque until one arrives.");
+  } else {
+    ROS_INFO_STREAM("TorquePDController_Simpson: starting with trajectory duration "
+                    << active_trajectory_->duration << " s");
   }
-
-  std::cout << "\n checking 0 \n" << std::endl;
-
-  // Convert std::vector<double> to Eigen::VectorXd
-  Eigen::VectorXd ts_eigen = Eigen::Map<Eigen::VectorXd>(ts.data(), ts.size());
-
-  std::cout << "ts_eigen: " << ts_eigen.transpose() << '\n' << std::endl;
-
-  q_hermite_spline_.fit(ts_eigen, loaded_q, loaded_v);
-  std::cout << "\n checking 1 \n" << std::endl;
-  v_hermite_spline_.fit(ts_eigen, loaded_v, loaded_a);
-  std::cout << "\n checking 2 \n" << std::endl;
-  u_quadratic_spline_.fit(ts_eigen, loaded_u);
-  std::cout << "\n checking 3 \n" << std::endl;
-
-
-  // linear spline for u
-  std::vector<Vec7> us;
-  for (int i = 0; i < loaded_u.rows(); i++)
-  {
-      Vec7 u = loaded_u.row(i).transpose();
-      us.push_back(u);
-  }
-  u_linear_spline_.reset(ts, us);
-
-
-  std::cout << "q_hermite_spline_ at t = 0.1: \n" << q_hermite_spline_.eval(0.1).transpose() << std::endl;
-  std::cout << "v_hermite_spline_ at t = 0.1: \n" << v_hermite_spline_.eval(0.1).transpose() << std::endl;
-  std::cout << "u_quadratic_spline_ at t = 0.1: \n" << u_quadratic_spline_.eval(0.1).transpose() << std::endl;
-  std::cout << "u_linear_spline_ at t = 0.1: \n" << u_linear_spline_(0.1).transpose() << std::endl;
 
   /* for N = 20, tried with simpson */
   // Kp_.resize(NUM_JOINTS);
@@ -304,7 +283,7 @@ void TorquePDController_Simpson::starting(const ros::Time& time)
   start_time_publisher_.publish(t_start_msg);
 
   // set traj end time
-  traj_completion_time_ = ts.back() + t_delay_;
+  traj_completion_time_ = active_trajectory_ ? active_trajectory_->duration + t_delay_ : 0.0;
   ROS_INFO("Trajectory end time (with delay = 0.1s): %.3f seconds \n", traj_completion_time_);
 
   /* signal when restarting the controller */
@@ -337,18 +316,65 @@ void TorquePDController_Simpson::starting(const ros::Time& time)
 //########################################################################################
 void TorquePDController_Simpson::update(const ros::Time& time, const ros::Duration& period) 
 {
+  // Pick up a newly published trajectory as soon as it arrives, so a fresh
+  // solve can be tracked without stopping/restarting this controller.
+  const auto& latest = *trajectory_buffer_.readFromRT();
+  if (latest && latest != active_trajectory_) {
+    active_trajectory_ = latest;
+    t_traj_ = 0.0;
+    traj_completion_time_ = active_trajectory_->duration + t_delay_;
+    traj_completion_published_ = false;
+    trajectory_finished_ = false; // leaving the hold phase: a fresh trajectory is now active
+    ROS_INFO_STREAM("TorquePDController_Simpson: switched to new trajectory, duration "
+                    << active_trajectory_->duration << " s");
+  }
+
   // get current state
   franka::RobotState robot_state = state_handle_->getRobotState();
   Eigen::Map<const Eigen::Matrix<double,7,1>> tau_J_d(robot_state.tau_J_d.data());
 
+  if (!active_trajectory_) {
+    // No trajectory received yet: hold zero commanded torque (Franka adds its
+    // own gravity compensation outside this interface) rather than evaluate
+    // splines that don't exist.
+    static franka_hw::TriggerRate warn_rate{1.0};
+    if (warn_rate()) {
+      ROS_WARN("TorquePDController_Simpson: no trajectory received yet, holding zero torque");
+    }
+    for (int i = 0; i < NUM_JOINTS; ++i) joint_handles_[i].setCommand(0.0);
+    return;
+  }
+
   // get time
   t_traj_ += period.toSec();
 
-  // index to get desired q, v, and tau_ff
-  Eigen::VectorXd q_d = q_hermite_spline_.eval(t_traj_);
-  Eigen::VectorXd v_d = v_hermite_spline_.eval(t_traj_);
-  // Eigen::VectorXd tau_ff_quadratic = u_quadratic_spline_.eval(t_traj_); // overshoots between knot points, do not use
-  Eigen::VectorXd tau_ff_linear = u_linear_spline_(t_traj_);
+  // ------------------------------------------------------------------
+  // Reference past the trajectory's end is a deliberate HOLD, not a bug
+  // in extrapolation: once t_traj_ exceeds duration, q_d, v_d and tau_ff
+  // freeze at the final knot. v_d is 0 by construction, and tau_ff is the
+  // last knot's effort (0 in our convention -- gravity is excluded from
+  // the solve and the FCI adds its own gravity compensation), so the arm
+  // parks at the final pose between segments. We clamp the evaluation
+  // time to `duration` so this behaviour is stated here explicitly,
+  // instead of being hidden inside each spline's zero-order-hold.
+  // ------------------------------------------------------------------
+  const bool holding_at_end = t_traj_ >= active_trajectory_->duration;
+  const double t_ref = holding_at_end ? active_trajectory_->duration : t_traj_;
+
+  // index to get desired q, v, and tau_ff at the (clamped) reference time
+  Eigen::VectorXd q_d = active_trajectory_->q_spline.eval(t_ref);
+  Eigen::VectorXd v_d = active_trajectory_->v_spline.eval(t_ref);
+  Eigen::VectorXd tau_ff_linear = active_trajectory_->u_spline(t_ref);
+
+  // log once when the hold phase begins (flag is reset in starting() and
+  // whenever a new trajectory is picked up below)
+  if (holding_at_end && !trajectory_finished_) {
+    trajectory_finished_ = true;
+    ROS_INFO_STREAM("Reference held at final pose -- q_d: " << q_d.transpose()
+                    << ", v_d: " << v_d.transpose()
+                    << ", tau_ff: " << tau_ff_linear.transpose());
+  }
+
 
   // filter out joint7 velocity
    for (size_t i = 0; i < 7; i++) {

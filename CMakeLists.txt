@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
   realtime_tools
   roscpp
   rospy
+  trajectory_msgs
   urdf
   visualization_msgs
 )
@@ -59,6 +60,7 @@ catkin_package(
     pluginlib
     realtime_tools
     roscpp
+    trajectory_msgs
     urdf
     visualization_msgs
   DEPENDS Franka

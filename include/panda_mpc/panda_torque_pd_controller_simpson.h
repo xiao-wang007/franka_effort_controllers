@@ -15,13 +15,13 @@
 #include <std_msgs/Float64MultiArray.h>
 #include <std_msgs/Float64.h>
 #include <std_msgs/Bool.h>
+#include <trajectory_msgs/JointTrajectory.h>
 
 //#include <franka_example_controllers/JointTorqueComparison.h>
 #include <franka_hw/franka_cartesian_command_interface.h>
 #include <franka_hw/franka_model_interface.h>
 #include <franka_hw/trigger_rate.h>
 #include "panda_mpc/hermite_spline.h"
-#include "panda_mpc/quadratic_spline.h"
 
 namespace franka_torque_controller {
  
@@ -149,12 +149,27 @@ class TorquePDController_Simpson : public controller_interface::MultiInterfaceCo
       mutable std::size_t last_idx_ = 0; // cache, mutable for const operator()
   }; 
 
+  // One received trajectory, already fitted into the splines update() reads.
+  // Built entirely on the (non-realtime) subscriber callback thread; update()
+  // only ever swaps a shared_ptr to one of these, which is realtime-safe.
+  struct TrajectoryData {
+    MultiCubicHermiteSpline q_spline;
+    MultiCubicHermiteSpline v_spline;
+    LinearSpline<Vec7> u_spline;
+    double duration = 0.0;  // last time knot, seconds
+  };
+
  private:
   Eigen::Matrix<double, 7, 1> SaturateTorqueRate(
                                     const Eigen::Matrix<double, 7, 1>& tau_d_calculated,
                                     const Eigen::Matrix<double, 7, 1>& tau_J_d);
 
   void u_cmd_callback(const std_msgs::Float64MultiArray::ConstPtr& msg);
+
+  // Parses a trajectory_msgs/JointTrajectory (positions, velocities, effort;
+  // accelerations are derived here via finite differences of velocity) and
+  // publishes the fitted result for update() to pick up.
+  void trajectoryCallback(const trajectory_msgs::JointTrajectory::ConstPtr& msg);
 
   std::unique_ptr<franka_hw::FrankaModelHandle> model_handle_;
   std::unique_ptr<franka_hw::FrankaStateHandle> state_handle_;
@@ -172,6 +187,9 @@ class TorquePDController_Simpson : public controller_interface::MultiInterfaceCo
 
   // sub and pub 
   ros::Subscriber u_cmd_subscriber_;
+  ros::Subscriber trajectory_subscriber_;
+  realtime_tools::RealtimeBuffer<std::shared_ptr<TrajectoryData>> trajectory_buffer_;
+  std::shared_ptr<TrajectoryData> active_trajectory_;
   realtime_tools::RealtimePublisher<std_msgs::Float64MultiArray> torque_publisher_;
 
   // path for ref trajs
@@ -194,12 +212,6 @@ class TorquePDController_Simpson : public controller_interface::MultiInterfaceCo
 //   std::string ref_traj_path_u_ {"/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_u.csv"};
 //   std::string message_to_console_ {"Tracking with Euler's, N = 60"};
 
-  // Trajectory file paths - loaded from YAML parameters
-  std::string ref_traj_path_h_;
-  std::string ref_traj_path_q_;
-  std::string ref_traj_path_v_;
-  std::string ref_traj_path_u_;
-  std::string ref_traj_path_a_;
   std::string message_to_console_;
 
   // case 4 in paper, Simpson N = 20
@@ -238,12 +250,6 @@ class TorquePDController_Simpson : public controller_interface::MultiInterfaceCo
 //   std::string ref_traj_path_a_ {"/home/sc19zx/catkin_ws/real_exp/6_em_noG_dtheta2.5_take2/without_maxing_em/N20_hlow0.08_ds0.14_dtheta_2.5_simpson_a.csv"};
 //   std::string message_to_console_ {"Tracking with Simpson's, N = 20"};
 
-  // hermite cubic
-  MultiCubicHermiteSpline q_hermite_spline_;
-  MultiCubicHermiteSpline v_hermite_spline_;
-  MultiQuadraticSpline u_quadratic_spline_;
-  LinearSpline<Vec7> u_linear_spline_;
-
   // starting time 
   double t_traj_;
   /* for N = 60 */
@@ -259,6 +265,9 @@ class TorquePDController_Simpson : public controller_interface::MultiInterfaceCo
   ros::Publisher traj_completion_pub_;
   double traj_completion_time_ = 0.0;
   bool traj_completion_published_ = false;
+  // true once t_traj_ >= active_trajectory_->duration: the reference is in the
+  // end-of-trajectory HOLD (q_d/v_d/tau_ff frozen at the final knot). Reset in
+  // starting() and whenever a new trajectory is picked up in update().
   bool trajectory_finished_ = false;
   double t_delay_ = 0.1; // 100ms delay to ensure trajectory completion
   int N_; // number of knots
