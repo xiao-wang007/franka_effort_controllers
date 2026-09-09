@@ -271,6 +271,14 @@ class TorquePDController_Simpson : public controller_interface::MultiInterfaceCo
   bool trajectory_finished_ = false;
   double t_delay_ = 0.1; // 100ms delay to ensure trajectory completion
   int N_; // number of knots
+
+  // Handoff safety gate (used in update()): a newly received trajectory is only
+  // accepted if it connects to the robot's current state. |q_now - q0| must be
+  // within q_start_tolerance_ [rad] and the trajectory's starting velocity |v0|
+  // within v_start_tolerance_ [rad/s]; otherwise the controller warns and keeps
+  // holding instead of tracking (avoids a PD torque kick / joint reflex).
+  double q_start_tolerance_ = 0.05; // rad
+  double v_start_tolerance_ = 0.1;  // rad/s
   
   // new params
   bool use_t_varying_gains_;

@@ -137,6 +137,16 @@ bool TorquePDController_Simpson::loadParameters(ros::NodeHandle& node_handle)
     wn_ = 2.0 * 3.14 * 4.0; // 4 Hz bandwidth
   }
 
+  if (!node_handle.getParam("q_start_tolerance", q_start_tolerance_)) {
+    ROS_WARN("TorquePDController_Simpson: q_start_tolerance parameter not found, using default");
+    q_start_tolerance_ = 0.05;
+  }
+
+  if (!node_handle.getParam("v_start_tolerance", v_start_tolerance_)) {
+    ROS_WARN("TorquePDController_Simpson: v_start_tolerance parameter not found, using default");
+    v_start_tolerance_ = 0.1;
+  }
+
   
   // Log loaded parameters
   ROS_INFO_STREAM("TorquePDController_Simpson: Loaded parameters:\n"
@@ -147,7 +157,9 @@ bool TorquePDController_Simpson::loadParameters(ros::NodeHandle& node_handle)
                   << "message: " << message_to_console_ << "\n"
                   << "use_t_varying_gains: " << (use_t_varying_gains_ ? "true" : "false") << "\n"
                   << "zeta: " << zeta_ << "\n"
-                  << "natural_frequency: " << wn_ << "\n");
+                  << "natural_frequency: " << wn_ << "\n"
+                  << "q_start_tolerance: " << q_start_tolerance_ << "\n"
+                  << "v_start_tolerance: " << v_start_tolerance_ << "\n");
 
   return true;
 }
@@ -316,22 +328,46 @@ void TorquePDController_Simpson::starting(const ros::Time& time)
 //########################################################################################
 void TorquePDController_Simpson::update(const ros::Time& time, const ros::Duration& period) 
 {
+  // get current state
+  franka::RobotState robot_state = state_handle_->getRobotState();
+  Eigen::Map<const Eigen::Matrix<double,7,1>> tau_J_d(robot_state.tau_J_d.data());
+
   // Pick up a newly published trajectory as soon as it arrives, so a fresh
   // solve can be tracked without stopping/restarting this controller.
   const auto& latest = *trajectory_buffer_.readFromRT();
   if (latest && latest != active_trajectory_) {
-    active_trajectory_ = latest;
-    t_traj_ = 0.0;
-    traj_completion_time_ = active_trajectory_->duration + t_delay_;
-    traj_completion_published_ = false;
-    trajectory_finished_ = false; // leaving the hold phase: a fresh trajectory is now active
-    ROS_INFO_STREAM("TorquePDController_Simpson: switched to new trajectory, duration "
-                    << active_trajectory_->duration << " s");
-  }
+    // --- Handoff safety gate ---------------------------------------------
+    // Only accept a trajectory that connects to the robot's current state.
+    // q0 is the trajectory's first knot and v0 its starting velocity; if the
+    // robot is not already at q0 (|q_now - q0| too large) or the solve starts
+    // with a nonzero velocity, tracking it would create a large PD error /
+    // torque kick that can trip the joint reflexes. In that case we warn and
+    // keep holding (active_trajectory_ is left untouched) until a consistent
+    // trajectory arrives.
+    // ---------------------------------------------------------------------
+    Eigen::Map<const Eigen::Matrix<double,7,1>> q_now(robot_state.q.data());
+    const Eigen::VectorXd q0 = latest->q_spline.eval(0.0);  // first knot position
+    const Eigen::VectorXd v0 = latest->v_spline.eval(0.0);  // first knot velocity
 
-  // get current state
-  franka::RobotState robot_state = state_handle_->getRobotState();
-  Eigen::Map<const Eigen::Matrix<double,7,1>> tau_J_d(robot_state.tau_J_d.data());
+    const double pos_gap = (q0 - q_now).norm();
+    const double start_speed = v0.norm();
+
+    if (pos_gap > q_start_tolerance_ || start_speed > v_start_tolerance_) {
+      ROS_WARN_THROTTLE(1.0,
+          "TorquePDController_Simpson: rejecting new trajectory -- |q_now - q0| = %.4f "
+          "rad (tol %.4f), |v0| = %.4f rad/s (tol %.4f). Staying put until a "
+          "consistent trajectory arrives.",
+          pos_gap, q_start_tolerance_, start_speed, v_start_tolerance_);
+    } else {
+      active_trajectory_ = latest;
+      t_traj_ = 0.0;
+      traj_completion_time_ = active_trajectory_->duration + t_delay_;
+      traj_completion_published_ = false;
+      trajectory_finished_ = false; // leaving the hold phase: a fresh trajectory is now active
+      ROS_INFO_STREAM("TorquePDController_Simpson: switched to new trajectory, duration "
+                      << active_trajectory_->duration << " s");
+    }
+  }
 
   if (!active_trajectory_) {
     // No trajectory received yet: hold zero commanded torque (Franka adds its

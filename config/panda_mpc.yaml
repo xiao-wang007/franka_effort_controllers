@@ -412,6 +412,11 @@ panda_torque_pd_controller_simpson:
     message_to_console: "Tracking with Simpson's, N = 40"
     use_t_varying_gains: true
     zeta: 1.0 # damping ratio
+    # handoff safety gate: reject a trajectory that doesn't start at q_now
+    # (max |q_now - q0| in rad) or that starts with a nonzero velocity
+    # (max |v0| in rad/s)
+    q_start_tolerance: 0.05
+    v_start_tolerance: 0.1
     # natural_frequency: 7.0 #// 1 Hz bandwidth, not reaching down enough
     # natural_frequency: 13.0 #// 2 Hz bandwidth, power-limit reflex triggered at the beginning
     # natural_frequency: 10.0 # better, but not reaching down enough
