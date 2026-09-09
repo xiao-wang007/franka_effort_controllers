@@ -15,22 +15,28 @@ panda_torque_pd_controller:
     arm_id: panda
     joint_names:
         - panda_joint1
-        - panda_joint2
-        - panda_joint3
-        - panda_joint4
+        - panda_joint2 - panda_joint3 - panda_joint4
         - panda_joint5
         - panda_joint6
         - panda_joint7
 
     # Euler N = 60, 1st case ever, also 1st real_exp in the paper
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/1/the paper
     # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/1/test3_N60_Euler_hlow0.03_h.csv"
     # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/1/test3_N60_Euler_hlow0.03_q.csv"
     # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/1/test3_N60_Euler_hlow0.03_v.csv"
     # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/1/test3_N60_Euler_hlow0.03_u.csv"
-    ref_traj_path_h: "/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_h.csv"
-    ref_traj_path_q: "/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_q.csv"
-    ref_traj_path_v: "/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_v.csv"
-    ref_traj_path_u: "/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_u.csv"
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_u.csv"
+
+    # Euler N = 20
+    ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/3/traj_N20_hlow0.07_euler_h.csv"
+    ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/3/traj_N20_hlow0.07_euler_q.csv"
+    ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/3/traj_N20_hlow0.07_euler_v.csv"
+    ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/3/traj_N20_hlow0.07_euler_u.csv"
+
     # kp_gains: [150., 150., 150., 150., 150., 150., 150.]
     # kd_gains: [30., 30., 30., 30., 30., 30., 5.]
 
@@ -43,8 +49,8 @@ panda_torque_pd_controller:
     kd_gains: [30., 30., 30., 30., 10., 10., 5.]
 
     alpha: 0.99
-    N: 60
-    message_to_console: "Tracking with Simpson's, N = 60"
+    N: 20
+    message_to_console: "Tracking with Euler, N = 20"
     use_t_varying_gains: false
     zeta: 1.0 # damping ratio
     natural_frequency: 24.0 
@@ -146,6 +152,208 @@ panda_torque_pd_controller_simpson:
     # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/without_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_u.csv"
     # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/without_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_a.csv"
 
+    # task4, ds=0.4, with maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/ds_0.4/task_4_ds0.4_0.0_case_1_opt_mdir_uhat0.0_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/ds_0.4/task_4_ds0.4_0.0_case_1_opt_mdir_uhat0.0_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/ds_0.4/task_4_ds0.4_0.0_case_1_opt_mdir_uhat0.0_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/ds_0.4/task_4_ds0.4_0.0_case_1_opt_mdir_uhat0.0_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/ds_0.4/task_4_ds0.4_0.0_case_1_opt_mdir_uhat0.0_a.csv"
+
+    # task4, ds=0.4, without maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/ds_0.4/task_4_ds0.4_0.0_case_1_no_opt_mdir_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/ds_0.4/task_4_ds0.4_0.0_case_1_no_opt_mdir_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/ds_0.4/task_4_ds0.4_0.0_case_1_no_opt_mdir_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/ds_0.4/task_4_ds0.4_0.0_case_1_no_opt_mdir_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/ds_0.4/task_4_ds0.4_0.0_case_1_no_opt_mdir_a.csv"
+
+    # for m = 0.5, the hot chocolate case, with maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.5/-1.0_case_3_m0.5_opt_mdir_uhat30_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.5/-1.0_case_3_m0.5_opt_mdir_uhat30_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.5/-1.0_case_3_m0.5_opt_mdir_uhat30_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.5/-1.0_case_3_m0.5_opt_mdir_uhat30_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.5/-1.0_case_3_m0.5_opt_mdir_uhat30_a.csv"
+
+    # for m = 0.5, the hot chocolate case, without maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.5/-1.0_case_3_m0.5_no_opt_mdir_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.5/-1.0_case_3_m0.5_no_opt_mdir_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.5/-1.0_case_3_m0.5_no_opt_mdir_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.5/-1.0_case_3_m0.5_no_opt_mdir_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.5/-1.0_case_3_m0.5_no_opt_mdir_a.csv"
+
+    # for m = 0.309, the tomato soup can, with maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309/-1.0_case_3_m0.309_opt_mdir_uhat30_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309/-1.0_case_3_m0.309_opt_mdir_uhat30_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309/-1.0_case_3_m0.309_opt_mdir_uhat30_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309/-1.0_case_3_m0.309_opt_mdir_uhat30_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309/-1.0_case_3_m0.309_opt_mdir_uhat30_a.csv"
+
+    # for m = 0.309, the tomato soup can, without maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309/-1.0_case_3_m0.309_no_opt_mdir_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309/-1.0_case_3_m0.309_no_opt_mdir_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309/-1.0_case_3_m0.309_no_opt_mdir_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309/-1.0_case_3_m0.309_no_opt_mdir_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309/-1.0_case_3_m0.309_no_opt_mdir_a.csv"
+
+    # for m = 0.309 set 2, the tomato soup can, with maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_set2/-1.0_case_3_m0.309_set2_opt_mdir_uhat30_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_set2/-1.0_case_3_m0.309_set2_opt_mdir_uhat30_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_set2/-1.0_case_3_m0.309_set2_opt_mdir_uhat30_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_set2/-1.0_case_3_m0.309_set2_opt_mdir_uhat30_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_set2/-1.0_case_3_m0.309_set2_opt_mdir_uhat30_a.csv"
+
+    # for m = 0.309 set 2, the tomato soup can, without maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_set2/-1.0_case_3_m0.309_set2_no_opt_mdir_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_set2/-1.0_case_3_m0.309_set2_no_opt_mdir_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_set2/-1.0_case_3_m0.309_set2_no_opt_mdir_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_set2/-1.0_case_3_m0.309_set2_no_opt_mdir_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_set2/-1.0_case_3_m0.309_set2_no_opt_mdir_a.csv"
+    
+
+    # for m = 0.309 set 3, the tomato soup can, with maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_set3/-1.0_case_3_m0.309_set3_opt_mdir_uhat30_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_set3/-1.0_case_3_m0.309_set3_opt_mdir_uhat30_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_set3/-1.0_case_3_m0.309_set3_opt_mdir_uhat30_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_set3/-1.0_case_3_m0.309_set3_opt_mdir_uhat30_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_set3/-1.0_case_3_m0.309_set3_opt_mdir_uhat30_a.csv"
+
+    # for m = 0.309 set 3, the tomato soup can, without maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_set3/-1.0_case_3_m0.309_set3_no_opt_mdir_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_set3/-1.0_case_3_m0.309_set3_no_opt_mdir_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_set3/-1.0_case_3_m0.309_set3_no_opt_mdir_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_set3/-1.0_case_3_m0.309_set3_no_opt_mdir_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_set3/-1.0_case_3_m0.309_set3_no_opt_mdir_a.csv"
+
+    # for m = 0.309 set 4, the tomato soup can, with maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_set4/-1.0_case_3_m0.309_set4_opt_mdir_uhat30_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_set4/-1.0_case_3_m0.309_set4_opt_mdir_uhat30_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_set4/-1.0_case_3_m0.309_set4_opt_mdir_uhat30_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_set4/-1.0_case_3_m0.309_set4_opt_mdir_uhat30_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_set4/-1.0_case_3_m0.309_set4_opt_mdir_uhat30_a.csv"
+
+    # for m = 0.309 set 4, the tomato soup can, without maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_set4/-1.0_case_3_m0.309_set4_no_opt_mdir_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_set4/-1.0_case_3_m0.309_set4_no_opt_mdir_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_set4/-1.0_case_3_m0.309_set4_no_opt_mdir_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_set4/-1.0_case_3_m0.309_set4_no_opt_mdir_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_set4/-1.0_case_3_m0.309_set4_no_opt_mdir_a.csv"
+
+
+    # for m = 0.309 set 5, the tomato soup can, with maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_set5/-1.0_case_3_m0.309_set5_opt_mdir_uhat30_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_set5/-1.0_case_3_m0.309_set5_opt_mdir_uhat30_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_set5/-1.0_case_3_m0.309_set5_opt_mdir_uhat30_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_set5/-1.0_case_3_m0.309_set5_opt_mdir_uhat30_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_set5/-1.0_case_3_m0.309_set5_opt_mdir_uhat30_a.csv"
+
+    # for m = 0.309 set 5, the tomato soup can, without maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_set5/-1.0_case_3_m0.309_set5_no_opt_mdir_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_set5/-1.0_case_3_m0.309_set5_no_opt_mdir_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_set5/-1.0_case_3_m0.309_set5_no_opt_mdir_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_set5/-1.0_case_3_m0.309_set5_no_opt_mdir_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_set5/-1.0_case_3_m0.309_set5_no_opt_mdir_a.csv"
+
+    # for m = 0.5 set 4, the hot chocolate, with maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.5_set4/-1.0_case_3_m0.5_set4_opt_mdir_uhat30_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.5_set4/-1.0_case_3_m0.5_set4_opt_mdir_uhat30_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.5_set4/-1.0_case_3_m0.5_set4_opt_mdir_uhat30_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.5_set4/-1.0_case_3_m0.5_set4_opt_mdir_uhat30_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.5_set4/-1.0_case_3_m0.5_set4_opt_mdir_uhat30_a.csv"
+
+    # for m = 0.5 set 4, the hot chocolate, without maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.5_set4/-1.0_case_3_m0.5_set4_no_opt_mdir_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.5_set4/-1.0_case_3_m0.5_set4_no_opt_mdir_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.5_set4/-1.0_case_3_m0.5_set4_no_opt_mdir_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.5_set4/-1.0_case_3_m0.5_set4_no_opt_mdir_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.5_set4/-1.0_case_3_m0.5_set4_no_opt_mdir_a.csv"
+
+
+    # for m = 0.5 set 5, the hot chocolate, with maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.5_set5/-1.0_case_3_m0.5_set5_opt_mdir_uhat30_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.5_set5/-1.0_case_3_m0.5_set5_opt_mdir_uhat30_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.5_set5/-1.0_case_3_m0.5_set5_opt_mdir_uhat30_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.5_set5/-1.0_case_3_m0.5_set5_opt_mdir_uhat30_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.5_set5/-1.0_case_3_m0.5_set5_opt_mdir_uhat30_a.csv"
+
+    # for m = 0.5 set 5, the hot chocolate, without maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.5_set5/-1.0_case_3_m0.5_set5_no_opt_mdir_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.5_set5/-1.0_case_3_m0.5_set5_no_opt_mdir_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.5_set5/-1.0_case_3_m0.5_set5_no_opt_mdir_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.5_set5/-1.0_case_3_m0.5_set5_no_opt_mdir_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.5_set5/-1.0_case_3_m0.5_set5_no_opt_mdir_a.csv"
+
+    # for m = 0.17 set 4, the bistro gravy, with maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.17_set4/-1.0_case_3_m0.17_set4_opt_mdir_uhat30_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.17_set4/-1.0_case_3_m0.17_set4_opt_mdir_uhat30_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.17_set4/-1.0_case_3_m0.17_set4_opt_mdir_uhat30_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.17_set4/-1.0_case_3_m0.17_set4_opt_mdir_uhat30_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.17_set4/-1.0_case_3_m0.17_set4_opt_mdir_uhat30_a.csv"
+
+    # for m = 0.17 set 4, the bistro gravy, without maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.17_set4/-1.0_case_3_m0.17_set4_no_opt_mdir_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.17_set4/-1.0_case_3_m0.17_set4_no_opt_mdir_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.17_set4/-1.0_case_3_m0.17_set4_no_opt_mdir_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.17_set4/-1.0_case_3_m0.17_set4_no_opt_mdir_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.17_set4/-1.0_case_3_m0.17_set4_no_opt_mdir_a.csv"
+
+
+    # for m = 0.17 set 5, the bistro gravy, with maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.17_set5/-1.0_case_3_m0.17_set5_opt_mdir_uhat30_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.17_set5/-1.0_case_3_m0.17_set5_opt_mdir_uhat30_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.17_set5/-1.0_case_3_m0.17_set5_opt_mdir_uhat30_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.17_set5/-1.0_case_3_m0.17_set5_opt_mdir_uhat30_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.17_set5/-1.0_case_3_m0.17_set5_opt_mdir_uhat30_a.csv"
+
+    # for m = 0.17 set 5, the bistro gravy, without maxing em, N40
+    ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.17_set5/-1.0_case_3_m0.17_set5_no_opt_mdir_h.csv"
+    ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.17_set5/-1.0_case_3_m0.17_set5_no_opt_mdir_q.csv"
+    ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.17_set5/-1.0_case_3_m0.17_set5_no_opt_mdir_v.csv"
+    ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.17_set5/-1.0_case_3_m0.17_set5_no_opt_mdir_u.csv"
+    ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.17_set5/-1.0_case_3_m0.17_set5_no_opt_mdir_a.csv"
+
+    # for m = 0.309 ds=0.5 set 4, the tomato soup, with maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.5/0.0_case_3_m0.309_ds0.5_opt_mdir_uhat30_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.5/0.0_case_3_m0.309_ds0.5_opt_mdir_uhat30_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.5/0.0_case_3_m0.309_ds0.5_opt_mdir_uhat30_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.5/0.0_case_3_m0.309_ds0.5_opt_mdir_uhat30_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.5/0.0_case_3_m0.309_ds0.5_opt_mdir_uhat30_a.csv"
+
+    
+    # for m = 0.309 ds=0.5 set 4, the tomato soup, without maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.5/0.0_case_3_m0.309_ds0.5_no_opt_mdir_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.5/0.0_case_3_m0.309_ds0.5_no_opt_mdir_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.5/0.0_case_3_m0.309_ds0.5_no_opt_mdir_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.5/0.0_case_3_m0.309_ds0.5_no_opt_mdir_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.5/0.0_case_3_m0.309_ds0.5_no_opt_mdir_a.csv"
+
+
+    # for m = 0.309 ds=0.4 set 4, the tomato soup, with maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.4/0.0_case_3_m0.309_ds0.4_opt_mdir_uhat30_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.4/0.0_case_3_m0.309_ds0.4_opt_mdir_uhat30_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.4/0.0_case_3_m0.309_ds0.4_opt_mdir_uhat30_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.4/0.0_case_3_m0.309_ds0.4_opt_mdir_uhat30_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.4/0.0_case_3_m0.309_ds0.4_opt_mdir_uhat30_a.csv"
+
+
+    # for m = 0.309 ds=0.4 set 4, the tomato soup, without maxing em, N40
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.4/0.0_case_3_m0.309_ds0.4_no_opt_mdir_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.4/0.0_case_3_m0.309_ds0.4_no_opt_mdir_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.4/0.0_case_3_m0.309_ds0.4_no_opt_mdir_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.4/0.0_case_3_m0.309_ds0.4_no_opt_mdir_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.4/0.0_case_3_m0.309_ds0.4_no_opt_mdir_a.csv"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     # extra case 1 with maxing em, N40
     # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/case1_extra4paper_N40_dtheta-1.00_ds0.30_mu_linear0.10_mu_angular0.15/with_maxing_em/N40_hlow0.06_ds0.30_dtheta_-1.0_simpson_h.csv"
     # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/case1_extra4paper_N40_dtheta-1.00_ds0.30_mu_linear0.10_mu_angular0.15/with_maxing_em/N40_hlow0.06_ds0.30_dtheta_-1.0_simpson_q.csv"
@@ -189,11 +397,11 @@ panda_torque_pd_controller_simpson:
     # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/without_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_a.csv"
     
     # extra case 6 with maxing em ONLY, N40
-    ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/case6_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_h.csv"
-    ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/case6_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_q.csv"
-    ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/case6_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_v.csv"
-    ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/case6_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_u.csv"
-    ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/case6_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_a.csv"
+    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/case6_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_h.csv"
+    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/case6_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_q.csv"
+    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/case6_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_v.csv"
+    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/case6_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_u.csv"
+    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/case6_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_a.csv"
 
     # Controller gains
     kp_gains: [225.0, 350.0, 250.0, 350.0, 50.0, 25.0, 10.0]
