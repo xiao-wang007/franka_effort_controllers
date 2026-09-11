@@ -1,3 +1,22 @@
+# Controller parameters for the Panda torque-tracking experiments.
+#
+# Load with `rosparam load config/panda_mpc.yaml`, then create and start the
+# controller in the controller manager:
+#
+#   rosservice call /controller_manager/load_controller \
+#     "name: 'panda_torque_pd_controller_simpson'"
+#   rosservice call /controller_manager/switch_controller \
+#     "start_controllers: ['panda_torque_pd_controller_simpson'] \
+#      stop_controllers: [] strictness: 2"
+#
+# The reference trajectory is NOT read from CSV files any more.  The Simpson
+# controller subscribes to /reference_trajectory (trajectory_msgs/JointTrajectory)
+# and publishes /trajectory_completion (std_msgs/Bool, latched), so its dead
+# ref_traj_path_* entries were removed here (the old experiment path lists are
+# still in git history).  panda_torque_pd_controller is the older file-based
+# controller and still REQUIRES its ref_traj_path_* entries; it is not used by
+# the live strike loop.
+
 panda_mpc_torque_controller:
     type: panda_mpc/MPCTorqueController
     arm_id: panda
@@ -15,23 +34,15 @@ panda_torque_pd_controller:
     arm_id: panda
     joint_names:
         - panda_joint1
-        - panda_joint2 - panda_joint3 - panda_joint4
+        - panda_joint2
+        - panda_joint3
+        - panda_joint4
         - panda_joint5
         - panda_joint6
         - panda_joint7
 
-    # Euler N = 60, 1st case ever, also 1st real_exp in the paper
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/1/the paper
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/1/test3_N60_Euler_hlow0.03_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/1/test3_N60_Euler_hlow0.03_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/1/test3_N60_Euler_hlow0.03_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/1/test3_N60_Euler_hlow0.03_u.csv"
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/experiments/task3_N60_euler_hlow0.03_dtheta1.0/test3_N60_Euler_hlow0.03_u.csv"
-
-    # Euler N = 20
+    # file-based reference trajectories -- required by this older controller.
+    # (The paths point at another machine's workspace; not used by the live loop.)
     ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/3/traj_N20_hlow0.07_euler_h.csv"
     ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/3/traj_N20_hlow0.07_euler_q.csv"
     ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/3/traj_N20_hlow0.07_euler_v.csv"
@@ -40,7 +51,7 @@ panda_torque_pd_controller:
     # kp_gains: [150., 150., 150., 150., 150., 150., 150.]
     # kd_gains: [30., 30., 30., 30., 30., 30., 5.]
 
-    # this set is the gains for the very first Euler N60 test 
+    # this set is the gains for the very first Euler N60 test
     # kp_gains: [50., 15., 15., 15., 15., 15., 15.]
     # kd_gains: [5., 5., 5., 5., 5., 5., 5.]
 
@@ -53,8 +64,8 @@ panda_torque_pd_controller:
     message_to_console: "Tracking with Euler, N = 20"
     use_t_varying_gains: false
     zeta: 1.0 # damping ratio
-    natural_frequency: 24.0 
-    
+    natural_frequency: 24.0
+
 panda_torque_pd_controller_simpson:
     type: panda_mpc/TorquePDController_Simpson
     arm_id: panda
@@ -66,342 +77,6 @@ panda_torque_pd_controller_simpson:
         - panda_joint5
         - panda_joint6
         - panda_joint7
-
-    # Trajectory file paths
-    # exp8_noG_dtheta0.00_ds0.40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.04_ds0.40_dtheta_0.0_simpson_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.04_ds0.40_dtheta_0.0_simpson_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.04_ds0.40_dtheta_0.0_simpson_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.04_ds0.40_dtheta_0.0_simpson_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.04_ds0.40_dtheta_0.0_simpson_a.csv"
-
-    # exp8_noG_dtheta0.00_ds0.40 without maxing_em
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.04_ds0.40_dtheta_0.0_simpson_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.04_ds0.40_dtheta_0.0_simpson_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.04_ds0.40_dtheta_0.0_simpson_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.04_ds0.40_dtheta_0.0_simpson_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.04_ds0.40_dtheta_0.0_simpson_a.csv"
-
-    # exp9, with maxing_em
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/9_em_noG_dtheta0.00_ds0.14/with_maxing_em/N40_hlow0.04_ds0.14_dtheta_0.0_simpson_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/9_em_noG_dtheta0.00_ds0.14/with_maxing_em/N40_hlow0.04_ds0.14_dtheta_0.0_simpson_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/9_em_noG_dtheta0.00_ds0.14/with_maxing_em/N40_hlow0.04_ds0.14_dtheta_0.0_simpson_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/9_em_noG_dtheta0.00_ds0.14/with_maxing_em/N40_hlow0.04_ds0.14_dtheta_0.0_simpson_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/9_em_noG_dtheta0.00_ds0.14/with_maxing_em/N40_hlow0.04_ds0.14_dtheta_0.0_simpson_a.csv"
-
-    # exp8, N60
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_N60_dtheta0.00_ds0.40/with_maxing_em/N60_hlow0.04_ds0.40_dtheta_0.0_simpson_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_N60_dtheta0.00_ds0.40/with_maxing_em/N60_hlow0.04_ds0.40_dtheta_0.0_simpson_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_N60_dtheta0.00_ds0.40/with_maxing_em/N60_hlow0.04_ds0.40_dtheta_0.0_simpson_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_N60_dtheta0.00_ds0.40/with_maxing_em/N60_hlow0.04_ds0.40_dtheta_0.0_simpson_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/8_em_noG_N60_dtheta0.00_ds0.40/with_maxing_em/N60_hlow0.04_ds0.40_dtheta_0.0_simpson_a.csv"
-
-    # exp10, with maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_a.csv"
-
-    # exp10, without maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/10_opt4norm_em_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_a.csv"
-
-    #exp10.5, with maxing em, N40, lowered the hit so it will not topple the can
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/with_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_a.csv"
-
-    #exp10.5, without maxing em, N40, lowered the hit so it will not topple the can
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/10.5_opt4norm_em_comparisons_N40_dtheta0.00_ds0.40/without_maxing_em/N40_hlow0.06_ds0.40_dtheta_0.0_simpson_a.csv"
-
-    # exp11 (good now with current tuning), with maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_a.csv"
-
-    # exp11, without maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/without_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/without_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/without_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/without_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/11_opt4ang_em_N40_dtheta2.50_ds0.21/without_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_a.csv"
-
-    # exp11.5, with maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/30.0deg/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/30.0deg/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/30.0deg/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/30.0deg/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/with_maxing_em/30.0deg/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_a.csv"
-
-    # exp11.5, without maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/without_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/without_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/without_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/without_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/11.5_opt4ang_em_N40_dtheta2.50_ds0.21/without_maxing_em/N40_hlow0.06_ds0.21_dtheta_2.5_simpson_a.csv"
-
-    # task4, ds=0.4, with maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/ds_0.4/task_4_ds0.4_0.0_case_1_opt_mdir_uhat0.0_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/ds_0.4/task_4_ds0.4_0.0_case_1_opt_mdir_uhat0.0_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/ds_0.4/task_4_ds0.4_0.0_case_1_opt_mdir_uhat0.0_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/ds_0.4/task_4_ds0.4_0.0_case_1_opt_mdir_uhat0.0_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/ds_0.4/task_4_ds0.4_0.0_case_1_opt_mdir_uhat0.0_a.csv"
-
-    # task4, ds=0.4, without maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/ds_0.4/task_4_ds0.4_0.0_case_1_no_opt_mdir_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/ds_0.4/task_4_ds0.4_0.0_case_1_no_opt_mdir_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/ds_0.4/task_4_ds0.4_0.0_case_1_no_opt_mdir_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/ds_0.4/task_4_ds0.4_0.0_case_1_no_opt_mdir_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/ds_0.4/task_4_ds0.4_0.0_case_1_no_opt_mdir_a.csv"
-
-    # for m = 0.5, the hot chocolate case, with maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.5/-1.0_case_3_m0.5_opt_mdir_uhat30_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.5/-1.0_case_3_m0.5_opt_mdir_uhat30_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.5/-1.0_case_3_m0.5_opt_mdir_uhat30_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.5/-1.0_case_3_m0.5_opt_mdir_uhat30_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.5/-1.0_case_3_m0.5_opt_mdir_uhat30_a.csv"
-
-    # for m = 0.5, the hot chocolate case, without maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.5/-1.0_case_3_m0.5_no_opt_mdir_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.5/-1.0_case_3_m0.5_no_opt_mdir_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.5/-1.0_case_3_m0.5_no_opt_mdir_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.5/-1.0_case_3_m0.5_no_opt_mdir_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.5/-1.0_case_3_m0.5_no_opt_mdir_a.csv"
-
-    # for m = 0.309, the tomato soup can, with maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309/-1.0_case_3_m0.309_opt_mdir_uhat30_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309/-1.0_case_3_m0.309_opt_mdir_uhat30_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309/-1.0_case_3_m0.309_opt_mdir_uhat30_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309/-1.0_case_3_m0.309_opt_mdir_uhat30_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309/-1.0_case_3_m0.309_opt_mdir_uhat30_a.csv"
-
-    # for m = 0.309, the tomato soup can, without maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309/-1.0_case_3_m0.309_no_opt_mdir_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309/-1.0_case_3_m0.309_no_opt_mdir_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309/-1.0_case_3_m0.309_no_opt_mdir_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309/-1.0_case_3_m0.309_no_opt_mdir_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309/-1.0_case_3_m0.309_no_opt_mdir_a.csv"
-
-    # for m = 0.309 set 2, the tomato soup can, with maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_set2/-1.0_case_3_m0.309_set2_opt_mdir_uhat30_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_set2/-1.0_case_3_m0.309_set2_opt_mdir_uhat30_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_set2/-1.0_case_3_m0.309_set2_opt_mdir_uhat30_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_set2/-1.0_case_3_m0.309_set2_opt_mdir_uhat30_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_set2/-1.0_case_3_m0.309_set2_opt_mdir_uhat30_a.csv"
-
-    # for m = 0.309 set 2, the tomato soup can, without maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_set2/-1.0_case_3_m0.309_set2_no_opt_mdir_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_set2/-1.0_case_3_m0.309_set2_no_opt_mdir_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_set2/-1.0_case_3_m0.309_set2_no_opt_mdir_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_set2/-1.0_case_3_m0.309_set2_no_opt_mdir_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_set2/-1.0_case_3_m0.309_set2_no_opt_mdir_a.csv"
-    
-
-    # for m = 0.309 set 3, the tomato soup can, with maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_set3/-1.0_case_3_m0.309_set3_opt_mdir_uhat30_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_set3/-1.0_case_3_m0.309_set3_opt_mdir_uhat30_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_set3/-1.0_case_3_m0.309_set3_opt_mdir_uhat30_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_set3/-1.0_case_3_m0.309_set3_opt_mdir_uhat30_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_set3/-1.0_case_3_m0.309_set3_opt_mdir_uhat30_a.csv"
-
-    # for m = 0.309 set 3, the tomato soup can, without maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_set3/-1.0_case_3_m0.309_set3_no_opt_mdir_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_set3/-1.0_case_3_m0.309_set3_no_opt_mdir_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_set3/-1.0_case_3_m0.309_set3_no_opt_mdir_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_set3/-1.0_case_3_m0.309_set3_no_opt_mdir_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_set3/-1.0_case_3_m0.309_set3_no_opt_mdir_a.csv"
-
-    # for m = 0.309 set 4, the tomato soup can, with maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_set4/-1.0_case_3_m0.309_set4_opt_mdir_uhat30_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_set4/-1.0_case_3_m0.309_set4_opt_mdir_uhat30_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_set4/-1.0_case_3_m0.309_set4_opt_mdir_uhat30_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_set4/-1.0_case_3_m0.309_set4_opt_mdir_uhat30_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_set4/-1.0_case_3_m0.309_set4_opt_mdir_uhat30_a.csv"
-
-    # for m = 0.309 set 4, the tomato soup can, without maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_set4/-1.0_case_3_m0.309_set4_no_opt_mdir_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_set4/-1.0_case_3_m0.309_set4_no_opt_mdir_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_set4/-1.0_case_3_m0.309_set4_no_opt_mdir_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_set4/-1.0_case_3_m0.309_set4_no_opt_mdir_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_set4/-1.0_case_3_m0.309_set4_no_opt_mdir_a.csv"
-
-
-    # for m = 0.309 set 5, the tomato soup can, with maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_set5/-1.0_case_3_m0.309_set5_opt_mdir_uhat30_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_set5/-1.0_case_3_m0.309_set5_opt_mdir_uhat30_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_set5/-1.0_case_3_m0.309_set5_opt_mdir_uhat30_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_set5/-1.0_case_3_m0.309_set5_opt_mdir_uhat30_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_set5/-1.0_case_3_m0.309_set5_opt_mdir_uhat30_a.csv"
-
-    # for m = 0.309 set 5, the tomato soup can, without maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_set5/-1.0_case_3_m0.309_set5_no_opt_mdir_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_set5/-1.0_case_3_m0.309_set5_no_opt_mdir_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_set5/-1.0_case_3_m0.309_set5_no_opt_mdir_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_set5/-1.0_case_3_m0.309_set5_no_opt_mdir_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_set5/-1.0_case_3_m0.309_set5_no_opt_mdir_a.csv"
-
-    # for m = 0.5 set 4, the hot chocolate, with maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.5_set4/-1.0_case_3_m0.5_set4_opt_mdir_uhat30_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.5_set4/-1.0_case_3_m0.5_set4_opt_mdir_uhat30_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.5_set4/-1.0_case_3_m0.5_set4_opt_mdir_uhat30_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.5_set4/-1.0_case_3_m0.5_set4_opt_mdir_uhat30_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.5_set4/-1.0_case_3_m0.5_set4_opt_mdir_uhat30_a.csv"
-
-    # for m = 0.5 set 4, the hot chocolate, without maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.5_set4/-1.0_case_3_m0.5_set4_no_opt_mdir_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.5_set4/-1.0_case_3_m0.5_set4_no_opt_mdir_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.5_set4/-1.0_case_3_m0.5_set4_no_opt_mdir_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.5_set4/-1.0_case_3_m0.5_set4_no_opt_mdir_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.5_set4/-1.0_case_3_m0.5_set4_no_opt_mdir_a.csv"
-
-
-    # for m = 0.5 set 5, the hot chocolate, with maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.5_set5/-1.0_case_3_m0.5_set5_opt_mdir_uhat30_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.5_set5/-1.0_case_3_m0.5_set5_opt_mdir_uhat30_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.5_set5/-1.0_case_3_m0.5_set5_opt_mdir_uhat30_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.5_set5/-1.0_case_3_m0.5_set5_opt_mdir_uhat30_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.5_set5/-1.0_case_3_m0.5_set5_opt_mdir_uhat30_a.csv"
-
-    # for m = 0.5 set 5, the hot chocolate, without maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.5_set5/-1.0_case_3_m0.5_set5_no_opt_mdir_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.5_set5/-1.0_case_3_m0.5_set5_no_opt_mdir_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.5_set5/-1.0_case_3_m0.5_set5_no_opt_mdir_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.5_set5/-1.0_case_3_m0.5_set5_no_opt_mdir_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.5_set5/-1.0_case_3_m0.5_set5_no_opt_mdir_a.csv"
-
-    # for m = 0.17 set 4, the bistro gravy, with maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.17_set4/-1.0_case_3_m0.17_set4_opt_mdir_uhat30_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.17_set4/-1.0_case_3_m0.17_set4_opt_mdir_uhat30_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.17_set4/-1.0_case_3_m0.17_set4_opt_mdir_uhat30_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.17_set4/-1.0_case_3_m0.17_set4_opt_mdir_uhat30_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.17_set4/-1.0_case_3_m0.17_set4_opt_mdir_uhat30_a.csv"
-
-    # for m = 0.17 set 4, the bistro gravy, without maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.17_set4/-1.0_case_3_m0.17_set4_no_opt_mdir_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.17_set4/-1.0_case_3_m0.17_set4_no_opt_mdir_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.17_set4/-1.0_case_3_m0.17_set4_no_opt_mdir_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.17_set4/-1.0_case_3_m0.17_set4_no_opt_mdir_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.17_set4/-1.0_case_3_m0.17_set4_no_opt_mdir_a.csv"
-
-
-    # for m = 0.17 set 5, the bistro gravy, with maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.17_set5/-1.0_case_3_m0.17_set5_opt_mdir_uhat30_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.17_set5/-1.0_case_3_m0.17_set5_opt_mdir_uhat30_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.17_set5/-1.0_case_3_m0.17_set5_opt_mdir_uhat30_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.17_set5/-1.0_case_3_m0.17_set5_opt_mdir_uhat30_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.17_set5/-1.0_case_3_m0.17_set5_opt_mdir_uhat30_a.csv"
-
-    # for m = 0.17 set 5, the bistro gravy, without maxing em, N40
-    ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.17_set5/-1.0_case_3_m0.17_set5_no_opt_mdir_h.csv"
-    ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.17_set5/-1.0_case_3_m0.17_set5_no_opt_mdir_q.csv"
-    ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.17_set5/-1.0_case_3_m0.17_set5_no_opt_mdir_v.csv"
-    ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.17_set5/-1.0_case_3_m0.17_set5_no_opt_mdir_u.csv"
-    ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.17_set5/-1.0_case_3_m0.17_set5_no_opt_mdir_a.csv"
-
-    # for m = 0.309 ds=0.5 set 4, the tomato soup, with maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.5/0.0_case_3_m0.309_ds0.5_opt_mdir_uhat30_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.5/0.0_case_3_m0.309_ds0.5_opt_mdir_uhat30_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.5/0.0_case_3_m0.309_ds0.5_opt_mdir_uhat30_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.5/0.0_case_3_m0.309_ds0.5_opt_mdir_uhat30_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.5/0.0_case_3_m0.309_ds0.5_opt_mdir_uhat30_a.csv"
-
-    
-    # for m = 0.309 ds=0.5 set 4, the tomato soup, without maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.5/0.0_case_3_m0.309_ds0.5_no_opt_mdir_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.5/0.0_case_3_m0.309_ds0.5_no_opt_mdir_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.5/0.0_case_3_m0.309_ds0.5_no_opt_mdir_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.5/0.0_case_3_m0.309_ds0.5_no_opt_mdir_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.5/0.0_case_3_m0.309_ds0.5_no_opt_mdir_a.csv"
-
-
-    # for m = 0.309 ds=0.4 set 4, the tomato soup, with maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.4/0.0_case_3_m0.309_ds0.4_opt_mdir_uhat30_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.4/0.0_case_3_m0.309_ds0.4_opt_mdir_uhat30_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.4/0.0_case_3_m0.309_ds0.4_opt_mdir_uhat30_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.4/0.0_case_3_m0.309_ds0.4_opt_mdir_uhat30_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.4/0.0_case_3_m0.309_ds0.4_opt_mdir_uhat30_a.csv"
-
-
-    # for m = 0.309 ds=0.4 set 4, the tomato soup, without maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.4/0.0_case_3_m0.309_ds0.4_no_opt_mdir_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.4/0.0_case_3_m0.309_ds0.4_no_opt_mdir_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.4/0.0_case_3_m0.309_ds0.4_no_opt_mdir_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.4/0.0_case_3_m0.309_ds0.4_no_opt_mdir_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/m0.309_ds0.4/0.0_case_3_m0.309_ds0.4_no_opt_mdir_a.csv"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # extra case 1 with maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/case1_extra4paper_N40_dtheta-1.00_ds0.30_mu_linear0.10_mu_angular0.15/with_maxing_em/N40_hlow0.06_ds0.30_dtheta_-1.0_simpson_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/case1_extra4paper_N40_dtheta-1.00_ds0.30_mu_linear0.10_mu_angular0.15/with_maxing_em/N40_hlow0.06_ds0.30_dtheta_-1.0_simpson_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/case1_extra4paper_N40_dtheta-1.00_ds0.30_mu_linear0.10_mu_angular0.15/with_maxing_em/N40_hlow0.06_ds0.30_dtheta_-1.0_simpson_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/case1_extra4paper_N40_dtheta-1.00_ds0.30_mu_linear0.10_mu_angular0.15/with_maxing_em/N40_hlow0.06_ds0.30_dtheta_-1.0_simpson_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/case1_extra4paper_N40_dtheta-1.00_ds0.30_mu_linear0.10_mu_angular0.15/with_maxing_em/N40_hlow0.06_ds0.30_dtheta_-1.0_simpson_a.csv"
-
-    # extra case 1 without maxing em, N40 
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/case1_extra4paper_N40_dtheta-1.00_ds0.30_mu_linear0.10_mu_angular0.15/without_maxing_em/N40_hlow0.06_ds0.30_dtheta_-1.0_simpson_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/case1_extra4paper_N40_dtheta-1.00_ds0.30_mu_linear0.10_mu_angular0.15/without_maxing_em/N40_hlow0.06_ds0.30_dtheta_-1.0_simpson_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/case1_extra4paper_N40_dtheta-1.00_ds0.30_mu_linear0.10_mu_angular0.15/without_maxing_em/N40_hlow0.06_ds0.30_dtheta_-1.0_simpson_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/case1_extra4paper_N40_dtheta-1.00_ds0.30_mu_linear0.10_mu_angular0.15/without_maxing_em/N40_hlow0.06_ds0.30_dtheta_-1.0_simpson_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/case1_extra4paper_N40_dtheta-1.00_ds0.30_mu_linear0.10_mu_angular0.15/without_maxing_em/N40_hlow0.06_ds0.30_dtheta_-1.0_simpson_a.csv"
-
-    # extra case 2 with maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/case2_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/case2_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/case2_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/case2_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/case2_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_a.csv"
-
-    # extra case 2 without maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/case2_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/without_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/case2_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/without_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/case2_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/without_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/case2_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/without_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/case2_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/without_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_a.csv"
-
-    # extra case 3 with maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_a.csv"
-
-    # extra case 3 without maxing em, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/without_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/without_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/without_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/without_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/case3_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/without_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_a.csv"
-    
-    # extra case 6 with maxing em ONLY, N40
-    # ref_traj_path_h: "/home/sc19zx/catkin_ws/real_exp/case6_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_h.csv"
-    # ref_traj_path_q: "/home/sc19zx/catkin_ws/real_exp/case6_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_q.csv"
-    # ref_traj_path_v: "/home/sc19zx/catkin_ws/real_exp/case6_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_v.csv"
-    # ref_traj_path_u: "/home/sc19zx/catkin_ws/real_exp/case6_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_u.csv"
-    # ref_traj_path_a: "/home/sc19zx/catkin_ws/real_exp/case6_extra4paper_N40_dtheta-1.00_ds0.25_mu_linear0.15_mu_angular0.20/with_maxing_em/N40_hlow0.06_ds0.25_dtheta_-1.0_simpson_a.csv"
 
     # Controller gains
     kp_gains: [225.0, 350.0, 250.0, 350.0, 50.0, 25.0, 10.0]
@@ -417,6 +92,9 @@ panda_torque_pd_controller_simpson:
     # (max |v0| in rad/s)
     q_start_tolerance: 0.05
     v_start_tolerance: 0.1
+
+    # natural_frequency tuning history (kept for reference; only the
+    # uncommented line is active)
     # natural_frequency: 7.0 #// 1 Hz bandwidth, not reaching down enough
     # natural_frequency: 13.0 #// 2 Hz bandwidth, power-limit reflex triggered at the beginning
     # natural_frequency: 10.0 # better, but not reaching down enough
@@ -426,7 +104,7 @@ panda_torque_pd_controller_simpson:
     # natural_frequency: 11.8 # triggered power-limit reflex at the beginning, not triggering when clamped torque
     # natural_frequency: 13.0 # triggered as well
     # natural_frequency: 12.5 # triggered as well
-    
+
     # above are initial trials that got q0 wrong
 
     # natural_frequency: 28. #  This is funny! 28. is too aggressive at the end, it wiggles when trying to stabilize at q_f
@@ -444,27 +122,26 @@ panda_torque_pd_controller_simpson:
     # for exp10 and exp10.5, with maxing_em
     # natural_frequency: 19.8 # This one for exp10, Damn, ee missed the target for the case without maxing_em and it looks much gentler
     # natural_frequency: 16.0 # not touching the can
-    # natural_frequency: 21.0 # 
+    # natural_frequency: 21.0 #
     # natural_frequency: 23.0 # this is the best and hits more accurately
     # natural_frequency: 24.0 # latest one for exp10 and exp10.5, with maxing_em
 
     # for extra cases to make paper video
-    natural_frequency: 24.0 
+    natural_frequency: 24.0
 
     # for exp11 and exp11.5, with maxing_em
     # natural_frequency: 18. # now it starts to work but the white bit touch the can pre-impact. on a second try, no engagement.
-    # natural_frequency: 18.5 # no engagement preimpact, but missed the contact 
-    # natural_frequency: 19. # no engagement preimpact, but missed the contact as well 
+    # natural_frequency: 18.5 # no engagement preimpact, but missed the contact
+    # natural_frequency: 19. # no engagement preimpact, but missed the contact as well
     # natural_frequency: 18.1 # ditto
     # natural_frequency: 17.9 # ditto
     # natural_frequency: 20.0 # ditto
     # natural_frequency: 22.0 # seems starting to engage
     # natural_frequency: 23.0 # yay, more engagement!
     # natural_frequency: 24.0 # currently settled to
-    # natural_frequency: 25.0 # good 
-    
+    # natural_frequency: 25.0 # good
+
     # for exp11 and exp11.5, without maxing_em
     # natural_frequency: 24.0 # obj went too far
     # natural_frequency: 20.0 # better but still far
     # natural_frequency: 18.0 # less far but feels sloppy
-    # natural_frequency: 26.0   # too far seems similar to 24.0 
