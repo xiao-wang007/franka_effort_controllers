@@ -34,7 +34,6 @@ if(NOT Franka_FOUND)
   find_package(Franka 0.8.0 REQUIRED)
 endif()
 
-generate_messages()
 
 #generate_dynamic_reconfigure_options(
 #  cfg/compliance_param.cfg
@@ -79,8 +78,6 @@ add_library(panda_torque_controllers
 add_dependencies(panda_torque_controllers
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
-  ${PROJECT_NAME}_generate_messages_cpp
-  ${PROJECT_NAME}_gencpp
   # ${PROJECT_NAME}_gencfg
 )
 
@@ -148,13 +145,9 @@ if(PEP_TOOLS)
   add_pyformat_target(franka_control FILES ${PYSOURCES})
 endif()
 
-# Header-only control core shared with the Cartesian planner.
-set(CARTESIAN_CORE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../drakecpp/include" CACHE PATH "Directory containing cartesian/core.h")
-if(NOT EXISTS "${CARTESIAN_CORE_INCLUDE_DIR}/cartesian/core.h")
-  message(FATAL_ERROR "Set CARTESIAN_CORE_INCLUDE_DIR to the drakecpp include directory")
-endif()
-target_include_directories(panda_torque_controllers PUBLIC ${CARTESIAN_CORE_INCLUDE_DIR})
-install(DIRECTORY ${CARTESIAN_CORE_INCLUDE_DIR}/cartesian DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+# Bundle the Eigen-only core so the robot workstation needs no Drake checkout.
+# The existing PUBLIC include/ directory resolves <cartesian/core.h>.
+install(DIRECTORY include/cartesian DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
 
 # Recorder test does not require a robot or a ROS master.
 if(CATKIN_ENABLE_TESTING)
@@ -163,6 +156,11 @@ if(CATKIN_ENABLE_TESTING)
   target_compile_options(simpson_recording_test PRIVATE -UNDEBUG)
   target_link_libraries(simpson_recording_test ${CMAKE_THREAD_LIBS_INIT})
   add_test(NAME simpson_recording_test COMMAND simpson_recording_test)
+  add_executable(cartesian_core_test tests/cartesian_core_test.cc)
+  target_include_directories(cartesian_core_test PRIVATE include)
+  target_include_directories(cartesian_core_test SYSTEM PRIVATE ${EIGEN3_INCLUDE_DIRS})
+  target_compile_options(cartesian_core_test PRIVATE -UNDEBUG)
+  add_test(NAME cartesian_core_test COMMAND cartesian_core_test)
 endif()
 # Existing include directory is panda_mpc, rather than the package name.
 install(DIRECTORY include/panda_mpc DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})

@@ -100,7 +100,7 @@ Loaded from the YAML file under `panda_torque_pd_controller_simpson`
 
 ```bash
 catkin_make            # package name: panda_torque_controllers
-roslaunch franka_effort_controllers panda_launch.launch
+roslaunch panda_torque_controllers panda_launch.launch
 ```
 
 The launch file starts `franka_control` and loads (without starting) the controller.
@@ -127,7 +127,7 @@ the pattern to follow.
 
 ## Cartesian trajectory controller
 
-The optional `panda_mpc/PandaCartesianTrajectoryController` tracks translation of the offset dummy1 tip and supports integrated joint resets. Legacy remains available. Build with `CARTESIAN_CORE_INCLUDE_DIR` pointing to the sibling drakecpp `include/` directory, then select `panda_cartesian_trajectory_controller` explicitly at rest. The loaded `ee_offset` and any configured `q_nominal` must agree with the planner. Restart after parameter changes or a latched controller fault.
+The optional `panda_mpc/PandaCartesianTrajectoryController` tracks translation of the offset dummy1 tip and supports integrated joint resets. Legacy remains available. The Eigen-only `include/cartesian/core.h` is bundled in this package, so building on the robot workstation requires neither Drake nor a sibling `drakecpp` checkout. Select `panda_cartesian_trajectory_controller` explicitly at rest. The loaded `ee_offset` and any configured `q_nominal` must agree with the planner. Restart after parameter changes or a latched controller fault.
 
 See the [Cartesian operating guide](../drakecpp/tools/README_cartesian.md) for messages, controller-start acknowledgements, telemetry, precision validation and workstation build requirements. The current implementation has offline mathematical/ROS message tests; its plugin build and actual robot tracking require workstation validation.
 
@@ -227,3 +227,38 @@ The standalone recorder test can run without a robot or ROS master:
 g++ -std=c++14 -pthread -I include tests/simpson_recording_test.cc -o /tmp/simpson_recording_test
 /tmp/simpson_recording_test
 ```
+
+
+## Building on a separate robot workstation
+
+The controller runs on the PC directly connected to the robot. The planner and
+Meshcat can run on another computer; the two communicate through ROS. Install or
+sync **this entire controller repository**, including `include/cartesian/core.h`,
+into the remote catkin workspace (`src/franka_effort_controllers-online` is fine).
+The ROS package name is `panda_torque_controllers`, independent of that folder name.
+No Drake installation or planner checkout is needed to compile these controllers.
+
+After syncing the changes, run these commands on the robot PC (SSH or its remote
+terminal):
+
+```bash
+source /opt/ros/noetic/setup.bash
+cd /home/sc19zx/catkin_ws
+catkin_make --pkg panda_torque_controllers
+source devel/setup.bash
+```
+
+Reload the controller/restart its launch at rest to load the rebuilt library.
+There is no need to set `CARTESIAN_CORE_INCLUDE_DIR`; stale values in an existing
+CMake cache are ignored. The empty `generate_messages()` call and its explicit
+zero-message target dependencies have been removed; this package consumes ROS
+messages and does not generate custom messages.
+
+Controller recordings are saved on the robot PC. With the default configuration
+and user `sc19zx`, they are under `/home/sc19zx/.ros/franka_effort_controllers/`.
+Use `recording_directory` to change that location. Copy the printed session
+folder back to the analysis machine together with the planner's run directory.
+
+The bundled Cartesian core is a byte-identical snapshot of the planner's shared
+header. When its equations change, sync the header to both repositories and run
+the shared-core tests; see `include/cartesian/README.md` for provenance.
