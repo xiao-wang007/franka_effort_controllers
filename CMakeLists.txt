@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(catkin REQUIRED COMPONENTS
   controller_interface
+  std_msgs
   dynamic_reconfigure
   eigen_conversions
   franka_hw
@@ -47,6 +48,7 @@ catkin_package(
   LIBRARIES panda_torque_controllers
   CATKIN_DEPENDS
     controller_interface
+  std_msgs
     dynamic_reconfigure
     eigen_conversions
     franka_hw
@@ -70,6 +72,7 @@ add_library(panda_torque_controllers
   src/panda_mpc_torque_controller.cc
   src/panda_torque_pd_controller.cc
   src/panda_torque_pd_controller_simpson.cc
+  src/panda_cartesian_trajectory_controller.cc
 )
 
 add_dependencies(panda_torque_controllers
@@ -145,3 +148,11 @@ if(PEP_TOOLS)
   file(GLOB_RECURSE PYSOURCES ${CMAKE_CURRENT_SOURCE_DIR}/scripts/*.py)
   add_pyformat_target(franka_control FILES ${PYSOURCES})
 endif()
+
+# Header-only control core shared with the Cartesian planner.
+set(CARTESIAN_CORE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../drakecpp/include" CACHE PATH "Directory containing cartesian/core.h")
+if(NOT EXISTS "${CARTESIAN_CORE_INCLUDE_DIR}/cartesian/core.h")
+  message(FATAL_ERROR "Set CARTESIAN_CORE_INCLUDE_DIR to the drakecpp include directory")
+endif()
+target_include_directories(panda_torque_controllers PUBLIC ${CARTESIAN_CORE_INCLUDE_DIR})
+install(DIRECTORY ${CARTESIAN_CORE_INCLUDE_DIR}/cartesian DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})

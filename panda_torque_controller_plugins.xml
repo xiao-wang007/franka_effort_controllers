@@ -30,3 +30,8 @@
     </description>
   </class>
 </library>
+<library path="lib/libpanda_torque_controllers">
+  <class name="panda_mpc/PandaCartesianTrajectoryController" type="franka_torque_controller::PandaCartesianTrajectoryController" base_class_type="controller_interface::ControllerBase">
+    <description>Offset-tip Cartesian quintic tracking and integrated joint resets.</description>
+  </class>
+</library>

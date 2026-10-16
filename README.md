@@ -124,3 +124,9 @@ each one up automatically and signals completion on `/trajectory_completion`.
 `package.xml` (it is: `<depend>trajectory_msgs</depend>`). If `catkin_package`
 complains about a `find_package`-ed dependency missing from `package.xml`, that is
 the pattern to follow.
+
+## Cartesian trajectory controller
+
+The optional `panda_mpc/PandaCartesianTrajectoryController` tracks translation of the offset dummy1 tip and supports integrated joint resets. Legacy remains available. Build with `CARTESIAN_CORE_INCLUDE_DIR` pointing to the sibling drakecpp `include/` directory, then select `panda_cartesian_trajectory_controller` explicitly at rest. The loaded `ee_offset` and any configured `q_nominal` must agree with the planner. Restart after parameter changes or a latched controller fault.
+
+See the [Cartesian operating guide](../drakecpp/tools/README_cartesian.md) for messages, controller-start acknowledgements, telemetry, precision validation and workstation build requirements. The current implementation has offline mathematical/ROS message tests; its plugin build and actual robot tracking require workstation validation.

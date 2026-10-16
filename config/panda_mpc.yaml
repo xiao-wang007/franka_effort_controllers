@@ -145,3 +145,18 @@ panda_torque_pd_controller_simpson:
     # natural_frequency: 24.0 # obj went too far
     # natural_frequency: 20.0 # better but still far
     # natural_frequency: 18.0 # less far but feels sloppy
+
+# Select explicitly; the legacy controller remains the default.
+panda_cartesian_trajectory_controller:
+    type: panda_mpc/PandaCartesianTrajectoryController
+    ee_offset: [0.0, 0.0, 0.3384]
+    wn: 20.0
+    zeta: 1.0
+    posture_wn: 2.0
+    axis_k: 5.0
+    axis_d: 1.0
+    filter_hz: 100.0
+    torque_rate: 700.0
+    start_position_tolerance: 0.001
+    start_joint_tolerance: 0.05
+    rest_velocity_tolerance: 0.05

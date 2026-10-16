@@ -30,6 +30,7 @@
   <depend>realtime_tools</depend>
   <depend>roscpp</depend>
   <depend>trajectory_msgs</depend>
+  <depend>std_msgs</depend>
   <depend>urdf</depend>
   <depend>visualization_msgs</depend>
 

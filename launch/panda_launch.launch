@@ -15,5 +15,5 @@
 
 	<!-- Load controller (but don't start - use spawner with stopped flag) -->
 	<node name="torque_controller_loader" pkg="controller_manager" type="spawner" 
-		args="--stopped panda_torque_pd_controller_simpson" respawn="false" output="screen"/>
+		args="--stopped panda_torque_pd_controller_simpson panda_cartesian_trajectory_controller" respawn="false" output="screen"/>
 </launch>
