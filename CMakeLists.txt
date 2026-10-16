@@ -28,6 +28,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(Eigen3 REQUIRED)
+find_package(Threads REQUIRED)
 find_package(Franka 0.9.0 QUIET)
 if(NOT Franka_FOUND)
   find_package(Franka 0.8.0 REQUIRED)
@@ -85,6 +86,7 @@ add_dependencies(panda_torque_controllers
 
 target_link_libraries(panda_torque_controllers PUBLIC
   ${Franka_LIBRARIES}
+  ${CMAKE_THREAD_LIBS_INIT}
   ${catkin_LIBRARIES}
 )
 
@@ -103,9 +105,6 @@ install(TARGETS panda_torque_controllers
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 install(DIRECTORY launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
@@ -156,3 +155,14 @@ if(NOT EXISTS "${CARTESIAN_CORE_INCLUDE_DIR}/cartesian/core.h")
 endif()
 target_include_directories(panda_torque_controllers PUBLIC ${CARTESIAN_CORE_INCLUDE_DIR})
 install(DIRECTORY ${CARTESIAN_CORE_INCLUDE_DIR}/cartesian DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+
+# Recorder test does not require a robot or a ROS master.
+if(CATKIN_ENABLE_TESTING)
+  add_executable(simpson_recording_test tests/simpson_recording_test.cc)
+  target_include_directories(simpson_recording_test PRIVATE include)
+  target_compile_options(simpson_recording_test PRIVATE -UNDEBUG)
+  target_link_libraries(simpson_recording_test ${CMAKE_THREAD_LIBS_INIT})
+  add_test(NAME simpson_recording_test COMMAND simpson_recording_test)
+endif()
+# Existing include directory is panda_mpc, rather than the package name.
+install(DIRECTORY include/panda_mpc DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})

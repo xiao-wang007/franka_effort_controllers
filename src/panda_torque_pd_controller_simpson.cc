@@ -1,6 +1,10 @@
 #include <panda_mpc/panda_torque_pd_controller_simpson.h>
 
 #include <algorithm>
+#include <cmath>
+#include <iomanip>
+#include <limits>
+#include <sstream>
 
 #include <controller_interface/controller_base.h>
 #include <pluginlib/class_list_macros.h>
@@ -66,6 +70,45 @@ bool TorquePDController_Simpson::init(hardware_interface::RobotHW* robot_hw, ros
   if (!loadParameters(node_handle)) {
     ROS_ERROR("TorquePDController_Simpson: Failed to load parameters from YAML file.");
     return false;
+  }
+
+  bool record_enabled = true;
+  node_handle.param("recording_enabled", record_enabled, true);
+  node_handle.param("recording_hold_seconds", recording_hold_seconds_, 2.0);
+  node_handle.param("recording_cartesian", recording_cartesian_, true);
+  std::string record_root;
+  node_handle.param<std::string>("recording_directory", record_root,
+                                "~/.ros/franka_effort_controllers");
+  std::vector<double> offset;
+  if (node_handle.getParam("recording_tip_offset", offset)) {
+    if (offset.size() != 3) { ROS_ERROR("recording_tip_offset must have three values"); return false; }
+    recording_tip_offset_ = Eigen::Map<const Eigen::Vector3d>(offset.data());
+  }
+  if (!recording_tip_offset_.allFinite() || !std::isfinite(recording_hold_seconds_) || recording_hold_seconds_ < 0) {
+    ROS_ERROR("Invalid Simpson recording parameters"); return false;
+  }
+  if (record_enabled) {
+    std::ostringstream settings;
+    settings << std::setprecision(17)
+      << "{\"schema_version\":1,\"controller_namespace\":" << SimpsonRecording::JsonString(node_handle.getNamespace())
+      << ",\"alpha\":" << alpha_ << ",\"use_t_varying_gains\":" << (use_t_varying_gains_ ? "true" : "false")
+      << ",\"zeta\":" << zeta_ << ",\"natural_frequency\":" << wn_
+      << ",\"torque_rate_limit_Nm_per_cycle\":" << delta_tau_max_
+      << ",\"q_start_tolerance\":" << q_start_tolerance_ << ",\"v_start_tolerance\":" << v_start_tolerance_
+      << ",\"hold_seconds\":" << recording_hold_seconds_ << ",\"cartesian_enabled\":" << (recording_cartesian_ ? "true" : "false")
+      << ",\"tip_frame\":\"flange\",\"tip_offset\":[" << recording_tip_offset_.x() << ',' << recording_tip_offset_.y() << ',' << recording_tip_offset_.z() << ']';
+    for (const auto& item : {std::make_pair("configured_kp", Kp_), std::make_pair("configured_kd", Kd_)}) {
+      settings << ",\"" << item.first << "\":[";
+      for (int j=0; j<7; ++j) settings << (j ? "," : "") << item.second[j];
+      settings << ']';
+    }
+    settings << ",\"torque_limits\":[87,87,87,87,12,12,12],\"reference_interpolation\":\"q: cubic Hermite(q,v); v: cubic Hermite(v,finite-difference acceleration); effort: first-order hold\"}\n";
+    try {
+      recording_ = std::make_unique<SimpsonRecording>(record_root, settings.str());
+      ROS_INFO_STREAM("Simpson recording directory: " << recording_->directory());
+    } catch (const std::exception& e) {
+      ROS_ERROR_STREAM("Cannot initialize Simpson recording: " << e.what()); return false;
+    }
   }
 
   // publish torque for debugging and analysis
@@ -187,6 +230,20 @@ void TorquePDController_Simpson::trajectoryCallback(
     col[i] = static_cast<int>(std::distance(msg->joint_names.begin(), it));
   }
 
+  for (const auto& pt : msg->points) {
+    for (int j = 0; j < NUM_JOINTS; ++j) {
+      const size_t c = static_cast<size_t>(col[j]);
+      if (c >= pt.positions.size() || c >= pt.velocities.size() ||
+          (!pt.effort.empty() && c >= pt.effort.size()) ||
+          !std::isfinite(pt.positions[c]) || !std::isfinite(pt.velocities[c]) ||
+          (!pt.effort.empty() && !std::isfinite(pt.effort[c]))) {
+        ROS_ERROR("Invalid Simpson trajectory arrays or nonfinite values"); return;
+      }
+    }
+    if (pt.time_from_start.toSec() < 0 || !std::isfinite(pt.time_from_start.toSec())) {
+      ROS_ERROR("Invalid Simpson trajectory time"); return;
+    }
+  }
   Eigen::VectorXd ts(n);
   Eigen::MatrixXd q(n, NUM_JOINTS), v(n, NUM_JOINTS), u(n, NUM_JOINTS);
   for (int i = 0; i < n; ++i) {
@@ -225,6 +282,28 @@ void TorquePDController_Simpson::trajectoryCallback(
   data->u_spline.reset(ts_vec, us);
   data->duration = ts(n - 1);
 
+  data->recording_id = ++next_recording_id_;
+  if (recording_) {
+    std::ostringstream csv, metadata;
+    csv << "t";
+    for (const auto* prefix : {"q", "v", "u", "a_interpolation"})
+      for (int j=1; j<=7; ++j) csv << ',' << prefix << j;
+    csv << '\n' << std::setprecision(17);
+    for (int i=0; i<n; ++i) {
+      csv << ts[i];
+      for (const auto* values : {&q, &v, &u, &a})
+        for (int j=0; j<7; ++j) csv << ',' << (*values)(i,j);
+      csv << '\n';
+    }
+    metadata << std::setprecision(17) << "{\"trajectory_id\":" << data->recording_id
+      << ",\"source_header_seq\":" << msg->header.seq
+      << ",\"source_header_stamp\":" << msg->header.stamp.toSec()
+      << ",\"received_stamp\":" << ros::Time::now().toSec()
+      << ",\"frame_id\":" << SimpsonRecording::JsonString(msg->header.frame_id)
+      << ",\"acceptance\":\"received; executions.csv identifies actual execution\"}\n";
+    try { recording_->SaveReference(data->recording_id, csv.str(), metadata.str()); }
+    catch (const std::exception& e) { ROS_ERROR_STREAM("Cannot save Simpson reference: " << e.what()); }
+  }
   trajectory_buffer_.writeFromNonRT(data);
   ROS_INFO_STREAM("TorquePDController_Simpson: received new trajectory, "
                   << n << " points, duration " << data->duration << " s");
@@ -321,6 +400,10 @@ void TorquePDController_Simpson::starting(const ros::Time& time)
     std::cout << "Kd: " << Kd_.transpose() << '\n' << std::endl;
   }
 
+  // Recording timing is anchored to the first actual reference evaluation.
+  recording_controller_start_ = time.toSec();
+  recording_start_pending_ = static_cast<bool>(active_trajectory_);
+  if (active_trajectory_) ++recording_execution_id_;
   // set controller start time
   t_traj_ = 0.0; 
 }
@@ -360,6 +443,8 @@ void TorquePDController_Simpson::update(const ros::Time& time, const ros::Durati
           pos_gap, q_start_tolerance_, start_speed, v_start_tolerance_);
     } else {
       active_trajectory_ = latest;
+      ++recording_execution_id_;
+      recording_start_pending_ = true;
       t_traj_ = 0.0;
       traj_completion_time_ = active_trajectory_->duration + t_delay_;
       traj_completion_published_ = false;
@@ -383,6 +468,12 @@ void TorquePDController_Simpson::update(const ros::Time& time, const ros::Durati
 
   // get time
   t_traj_ += period.toSec();
+  if (recording_start_pending_) {
+    // update() advances elapsed before evaluating the reference. This origin
+    // gives stamp - trajectory_start == elapsed, also for hot-swapped commands.
+    recording_trajectory_start_ = time.toSec() - t_traj_;
+    recording_start_pending_ = false;
+  }
 
   // ------------------------------------------------------------------
   // Reference past the trajectory's end is a deliberate HOLD, not a bug
@@ -444,6 +535,9 @@ void TorquePDController_Simpson::update(const ros::Time& time, const ros::Durati
                       + Kd_(i) * (v_d(i) - dq_filtered_[i]);
   }
 
+  // Preserve requested torque before either limiter for diagnostics only.
+  const Eigen::VectorXd tau_requested = tau_calculated;
+
   // clamp the torque to be within limits
   tau_calculated = tau_calculated.cwiseMax(tau_min);
   tau_calculated = tau_calculated.cwiseMin(tau_max);
@@ -455,6 +549,10 @@ void TorquePDController_Simpson::update(const ros::Time& time, const ros::Durati
   {
       joint_handles_[i].setCommand(tau_cmd[i]);
   }
+
+  if (recording_ && t_traj_ <= active_trajectory_->duration + recording_hold_seconds_)
+    recordCycle(time, period, robot_state, q_d, v_d, tau_ff_linear,
+                tau_requested, tau_calculated, tau_cmd, holding_at_end, t_ref);
 
   // Publish the torque command if the trigger rate allows it
   if (trigger_rate_() && torque_publisher_.trylock())
@@ -476,6 +574,69 @@ void TorquePDController_Simpson::update(const ros::Time& time, const ros::Durati
     traj_completion_published_ = true;
     ROS_INFO("Trajectory complete at t=%.3f seconds", t_traj_);
   }
+}
+
+// Recording adds no disk I/O to update(). FK/Jacobians use fixed-size storage;
+// all values are captured on the same cycle as the command sent to the joints.
+void TorquePDController_Simpson::recordCycle(
+    const ros::Time& time, const ros::Duration& period, const franka::RobotState& state,
+    const Eigen::VectorXd& q_ref, const Eigen::VectorXd& v_ref, const Eigen::VectorXd& tau_ff,
+    const Eigen::VectorXd& requested, const Eigen::VectorXd& clamped,
+    const Vec7& command, bool holding, double reference_time) {
+  SimpsonRecording::Row row{};
+  unsigned magnitude_mask = 0, rate_mask = 0;
+  for (int j=0; j<7; ++j) {
+    if (std::abs(requested[j]-clamped[j]) > 1e-12) magnitude_mask |= 1u << j;
+    if (std::abs(clamped[j]-command[j]) > 1e-12) rate_mask |= 1u << j;
+  }
+  size_t k=0;
+  for (double x : {double(++recording_sequence_), time.toSec(), period.toSec(),
+       recording_controller_start_, recording_trajectory_start_, double(active_trajectory_->recording_id),
+       double(recording_execution_id_), t_traj_, reference_time, active_trajectory_->duration,
+       holding ? 1.0 : 0.0, double(magnitude_mask), double(rate_mask), double(recording_->dropped()), 1.0}) row[k++]=x;
+  const Eigen::VectorXd v_from_q = active_trajectory_->q_spline.evald(reference_time);
+  for (int group=0; group<16; ++group) for (int j=0; j<7; ++j) {
+    double x=0;
+    switch (group) {
+      case 0: x=state.q[j]; break;
+      case 1: x=state.dq[j]; break;
+      case 2: x=dq_filtered_[j]; break;
+      case 3: x=q_ref[j]; break;
+      case 4: x=v_ref[j]; break;
+      case 5: x=v_from_q[j]; break;
+      case 6: x=tau_ff[j]; break;
+      case 7: x=Kp_[j]*(q_ref[j]-state.q[j]); break;
+      case 8: x=Kd_[j]*(v_ref[j]-dq_filtered_[j]); break;
+      case 9: x=requested[j]; break;
+      case 10: x=clamped[j]; break;
+      case 11: x=command[j]; break;
+      case 12: x=state.tau_J_d[j]; break;
+      case 13: x=state.tau_J[j]; break;
+      case 14: x=Kp_[j]; break;
+      case 15: x=Kd_[j]; break;
+    }
+    row[k++]=x;
+  }
+  std::array<Eigen::Vector3d,4> tip;
+  for (auto& x : tip) x.setConstant(std::numeric_limits<double>::quiet_NaN());
+  if (recording_cartesian_) {
+    std::array<double,7> qd;
+    for (int j=0; j<7; ++j) qd[j]=q_ref[j];
+    for (int which=0; which<2; ++which) {
+      const auto& q = which == 0 ? qd : state.q;
+      const auto pose = model_handle_->getPose(franka::Frame::kFlange, q, state.F_T_EE, state.EE_T_K);
+      const auto jac = model_handle_->getZeroJacobian(franka::Frame::kFlange, q, state.F_T_EE, state.EE_T_K);
+      Eigen::Map<const Eigen::Matrix4d> X(pose.data());
+      Eigen::Map<const Eigen::Matrix<double,6,7>> J(jac.data());
+      const Eigen::Vector3d r = X.topLeftCorner<3,3>() * recording_tip_offset_;
+      Vec7 velocity;
+      for (int j=0; j<7; ++j) velocity[j]=which == 0 ? v_ref[j] : state.dq[j];
+      tip[2*which] = X.topRightCorner<3,1>() + r;
+      tip[2*which+1] = J.topRows<3>() * velocity + (J.bottomRows<3>() * velocity).cross(r);
+    }
+  }
+  for (const auto& x : tip) for (int j=0; j<3; ++j) row[k++]=x[j];
+  recording_->Push(row);
 }
 
 //########################################################################################

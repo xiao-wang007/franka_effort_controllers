@@ -22,6 +22,7 @@
 #include <franka_hw/franka_model_interface.h>
 #include <franka_hw/trigger_rate.h>
 #include "panda_mpc/hermite_spline.h"
+#include "panda_mpc/simpson_recording.h"
 
 namespace franka_torque_controller {
  
@@ -157,12 +158,26 @@ class TorquePDController_Simpson : public controller_interface::MultiInterfaceCo
     MultiCubicHermiteSpline v_spline;
     LinearSpline<Vec7> u_spline;
     double duration = 0.0;  // last time knot, seconds
+    uint64_t recording_id = 0;
   };
 
  private:
   Eigen::Matrix<double, 7, 1> SaturateTorqueRate(
                                     const Eigen::Matrix<double, 7, 1>& tau_d_calculated,
                                     const Eigen::Matrix<double, 7, 1>& tau_J_d);
+
+  void recordCycle(const ros::Time& time, const ros::Duration& period,
+                   const franka::RobotState& state, const Eigen::VectorXd& q_ref,
+                   const Eigen::VectorXd& v_ref, const Eigen::VectorXd& tau_ff,
+                   const Eigen::VectorXd& requested, const Eigen::VectorXd& clamped,
+                   const Vec7& command, bool holding, double reference_time);
+  std::unique_ptr<SimpsonRecording> recording_;
+  std::atomic<uint64_t> next_recording_id_{0};
+  uint64_t recording_execution_id_ = 0, recording_sequence_ = 0;
+  double recording_controller_start_ = 0.0, recording_trajectory_start_ = 0.0;
+  double recording_hold_seconds_ = 2.0;
+  bool recording_start_pending_ = false, recording_cartesian_ = true;
+  Eigen::Vector3d recording_tip_offset_{0.0, 0.0, 0.3384};
 
   void u_cmd_callback(const std_msgs::Float64MultiArray::ConstPtr& msg);
 

@@ -130,3 +130,100 @@ the pattern to follow.
 The optional `panda_mpc/PandaCartesianTrajectoryController` tracks translation of the offset dummy1 tip and supports integrated joint resets. Legacy remains available. Build with `CARTESIAN_CORE_INCLUDE_DIR` pointing to the sibling drakecpp `include/` directory, then select `panda_cartesian_trajectory_controller` explicitly at rest. The loaded `ee_offset` and any configured `q_nominal` must agree with the planner. Restart after parameter changes or a latched controller fault.
 
 See the [Cartesian operating guide](../drakecpp/tools/README_cartesian.md) for messages, controller-start acknowledgements, telemetry, precision validation and workstation build requirements. The current implementation has offline mathematical/ROS message tests; its plugin build and actual robot tracking require workstation validation.
+
+## Simpson controller recordings (joint/Cartesian references and torques)
+
+Recording is enabled in `config/panda_mpc.yaml`. Rebuild this package on the robot
+workstation, then reload the controller (or restart its launch) before collecting
+strikes. No changes to the planner/live-loop repository are required.
+
+```bash
+# Run in the ROS catkin workspace on the robot workstation.
+catkin_make --pkg panda_torque_controllers
+```
+
+At controller load, the console prints `Simpson recording directory: ...`.
+The default is `~/.ros/franka_effort_controllers/simpson_<UTC timestamp>_<pid>/`
+on **the machine running franka_control**, not necessarily the planner laptop.
+Use `recording_directory` to choose another writable local directory. Each load
+creates a unique session; controller restarts within that load share it.
+
+The files are:
+
+- `settings.json`: loaded gain/filter settings, configured static gains, torque
+  limits, the current per-cycle torque-rate limit, handoff tolerances, tip offset,
+  interpolation description, and recording settings. `alpha` weights the newest
+  measured velocity; 0.99 provides very little filtering.
+- `reference_<trajectory_id>.csv`: received knots in canonical Panda joint order:
+  `t,q1..7,v1..7,u1..7,a_interpolation1..7`. The acceleration columns are the actual
+  finite differences used to construct the independent velocity spline. These
+  knots reproduce the controller's current reference exactly.
+- `reference_<trajectory_id>.json`: original message sequence/stamp/frame and
+  receipt timestamp. Receiving a reference does not imply it was executed.
+- `executions.csv`: controller-start and per-execution trajectory-start ROS
+  timestamps, first sample timestamp, duration, trajectory ID and execution ID.
+  Hot-swapped trajectories and replays receive distinct execution IDs. IDs are
+  local to this controller load and are not `strike_iterNNN` numbers; compare
+  the reference knots/source stamp to associate them with planner CSVs.
+- `samples.csv`: one row per controller cycle while executing, plus the configured
+  `recording_hold_seconds` (default 2 s) of final hold. Its header names every
+  column. It includes timestamps, period, reference time, measured `q`, raw and
+  filtered `dq`, evaluated `q_ref`/`dq_ref`, the diagnostic `dq_from_q_ref`, actual
+  per-cycle `kp`/`kd`, feedforward/position/velocity torque components, each torque
+  stage, and limiter bit masks (bit 0 = joint 1). The gains recorded here include
+  the configuration-dependent mass-diagonal scaling.
+- `status.json`: written on normal controller unload/shutdown after draining the
+  buffer; reports written/dropped samples and write success. Its absence means
+  orderly shutdown was not confirmed. While running, inspect the sequence gaps,
+  `dropped_samples`, and console warnings. Samples/executions flush every 0.5 s;
+  abrupt process termination can lose the latest unflushed data.
+
+Torque columns have deliberately distinct meanings:
+
+| Columns | Meaning |
+|---|---|
+| `tau_requested1..7` | Feedforward + PD before either controller limiter |
+| `tau_clamped1..7` | After absolute joint-torque clipping |
+| `tau_command1..7` | After rate limiting; value sent through the effort interface |
+| `tau_J_d1..7` | Franka-reported desired joint torque, excluding gravity; observed before this cycle's new command |
+| `tau_J1..7` | Measured joint torque sensor signals, including gravity effects |
+
+The effort-interface command is not a direct measurement of motor-applied torque.
+FCI/hardware processing can change it; compare it with subsequent `tau_J_d`
+samples, allowing for transport/control delay. Do not directly subtract the
+measured `tau_J` from a gravity-excluded command to infer tracking error.
+
+With `recording_cartesian: true`, each sample also contains `p_ref_x/y/z`,
+`v_ref_x/y/z`, `p_measured_x/y/z`, and `v_measured_x/y/z`. These are computed from
+Franka's model in the robot base frame, for a point at `recording_tip_offset`
+relative to the flange (`panda_link8`). Set that offset to match the planner's
+`ee_offset`; the initial value is `[0, 0, 0.3384]` metres. The measured tip state is
+FK/Jacobian-derived from measured joints, not an external position measurement.
+The velocity reference uses the controller's actual independent velocity spline.
+The Franka model may differ slightly from the Drake model used by Meshcat.
+Setting `recording_cartesian: false` writes NaNs in the Cartesian columns and
+avoids the extra FK/Jacobian evaluations.
+
+All CSV formatting and disk I/O run outside `update()` on a background thread.
+The control thread copies into a fixed-capacity buffer; overflow drops samples
+and increments a counter rather than blocking control. Recording attempts every
+control cycle (normally 1 kHz), not the existing slow `/torque_comparison` topic.
+Cartesian logging adds model evaluations to the control cycle; inspect `period`
+and workstation timing when validating this instrumentation. The logger does
+not change gain values, filtering, interpolation, terminal feedforward, command
+admission, or torque limiting. Invalid trajectory arrays are rejected before
+interpolation/logging rather than throwing on indexing.
+
+The existing live loop already saves `strike_iterNNN.csv` with planned joint
+states/torques and reconstructs the displayed Cartesian path from those knots;
+it does not save a separate dense Cartesian trace. These controller recordings
+add the evaluated Cartesian reference and measured motion on the same clock as
+the actual command. For analysis, copy the whole controller session directory
+alongside the corresponding planner run directory.
+
+The standalone recorder test can run without a robot or ROS master:
+
+```bash
+g++ -std=c++14 -pthread -I include tests/simpson_recording_test.cc -o /tmp/simpson_recording_test
+/tmp/simpson_recording_test
+```

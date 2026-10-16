@@ -67,6 +67,13 @@ panda_torque_pd_controller:
     natural_frequency: 24.0
 
 panda_torque_pd_controller_simpson:
+    # Local workstation recording. Files are written by a background thread.
+    recording_enabled: true
+    recording_directory: "~/.ros/franka_effort_controllers"
+    recording_hold_seconds: 2.0
+    recording_cartesian: true
+    # Must match the planner tool offset; measured from flange/panda_link8.
+    recording_tip_offset: [0.0, 0.0, 0.3384]
     type: panda_mpc/TorquePDController_Simpson
     arm_id: panda
     joint_names:
